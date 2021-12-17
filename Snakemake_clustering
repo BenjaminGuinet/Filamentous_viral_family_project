@@ -1,0 +1,67 @@
+from Bio import SeqIO 
+import pandas as pd 
+import re 
+
+List_viruses =["LhFV_free","DFV_free","EfFV_free","PoFV_free","PcFV_free"]
+List_known_viruses=["AcMNPV","LdMNPV","CpV","NeseNPV","CuniNPV","HzNV-1","HzNV-2","GbNV","OrNV","ToNV","DiNV","DmNV_kal","DmNV_tom","DmNV_esp","DmNV_mau","PmNV","HgNV","DhNV","GpSGHV","MdSGHV","LbFV","AmFV"]
+
+ 
+#Add predicted ORFs
+with open("/beegfs/data/bguinet/LbFV_family_project/Clustering/ALL_Predicted_and_known_ORFs.fa","w") as output:
+  #Add predicted ORFs
+  for names in List_viruses:
+    records = SeqIO.parse("/beegfs/data/bguinet/LbFV_family_project/Genomes/"+names+"/Predicted_orfs/"+names+"_prediction_option_1.fa", "fasta")
+    for ORF in records:
+       print(">",ORF.id+"_"+re.sub("_free","",names),sep="",file=output)
+       print(ORF.seq,file=output)
+  #Add known ORFs
+  #Keep only the accession number as sequence name
+  for viruse in List_known_viruses:
+    records = SeqIO.parse("/beegfs/data/bguinet/LbFV_family_project/Clustering/Refseq_dsDNA_genomes/"+viruse+".faa", "fasta")
+    for ORF in records:
+      if ORF.id.count("|") >1:
+        print('>',re.search("\\|(.*)\\|",ORF.id)[1],"_",viruse,sep="",file=output)
+        print(ORF.seq,file=output)
+      elif "_prot_" in ORF.id:
+        ORF.id=re.sub(".*_prot_","",ORF.id)
+        ORF.id=re.sub(".[0-9]_.*","",ORF.id)
+        print('>',re.sub(".*_prot_","",ORF.id),"_",viruse,sep="",file=output)
+        print(ORF.seq,file=output)
+
+#Snakemake part 
+
+rule all:
+  input:
+    "/beegfs/data/bguinet/LbFV_family_project/Clustering/ALL_Predicted_and_known_ORFs_cluster.tsv",
+    "/beegfs/data/bguinet/LbFV_family_project/Clustering/ALL_Predicted_and_known_ORFs_cluster.tab"
+    
+rule Clustering:
+    params:
+      threads="20",
+      time="00:40:00",
+      name="Clustering_LbFV_family",
+      out="/beegfs/data/bguinet/LbFV_family_project/Clustering/Clustering_job.out",
+      err="//beegfs/data/bguinet/LbFV_family_project/Clustering/Clustering_job.error"
+    input: 
+      database_fasta= "/beegfs/data/bguinet/LbFV_family_project/Clustering/ALL_Predicted_and_known_ORFs.fa"
+    output :
+      Clustering_output= "/beegfs/data/bguinet/LbFV_family_project/Clustering/ALL_Predicted_and_known_ORFs_cluster.tsv",
+      Clustering_filtred_output="/beegfs/data/bguinet/LbFV_family_project/Clustering/ALL_Predicted_and_known_ORFs_cluster.tab"
+    shell:
+      """
+      #Note: We use the following parameters: 
+      #--cluster-mode 1 : Connected component clustering that uses the transitive connection to cover more distant homologs.
+      #--cov-mode 0 : Bidirectional coverage, where only sequences with overlapping sequence lengths greater than 30% of the longer of the two sequences are clustered, 
+      #(in this case always the viral sequence since the loci are defined by viral hits). 
+      #-evalue 0.0001 : To eliminate false positives. 
+      # --cluster-reassign : During the cascade clustering of Mmseqs2, as the representative of a cluster can change at each iteration, 
+      #it can happen that some members that were already close to a cluster do not fulfill the clustering criteria anymore. We therefore correct this by reassigning 
+      #these sequences.
+      /beegfs/data/bguinet/TOOLS/mmseqs/bin/mmseqs createdb {input.database_fasta} /beegfs/data/bguinet/LbFV_family_project/Clustering/ALL_Predicted_and_known_ORFs_db
+
+      /beegfs/data/bguinet/TOOLS/mmseqs/bin/mmseqs cluster /beegfs/data/bguinet/LbFV_family_project/Clustering/ALL_Predicted_and_known_ORFs_db /beegfs/data/bguinet/LbFV_family_project/Clustering/ALL_Predicted_and_known_ORFs_cluster /beegfs/data/bguinet/LbFV_family_project/Clustering/ALL_Predicted_and_known_ORFs_tpm --threads 10 -s 7.5 --cluster-mode 1 --cov-mode 0 -c 0.30 -e 0.0001
+
+      /beegfs/data/bguinet/TOOLS/mmseqs/bin/mmseqs createtsv /beegfs/data/bguinet/LbFV_family_project/Clustering/ALL_Predicted_and_known_ORFs_db /beegfs/data/bguinet/LbFV_family_project/Clustering/ALL_Predicted_and_known_ORFs_db /beegfs/data/bguinet/LbFV_family_project/Clustering/ALL_Predicted_and_known_ORFs_cluster {output.Clustering_output}
+
+      python3 /beegfs/home/bguinet/these_scripts_2/MMseqs2_clust_to_tab.py -f {output.Clustering_output} -o {output.Clustering_filtred_output}
+      """
