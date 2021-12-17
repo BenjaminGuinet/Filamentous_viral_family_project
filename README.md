@@ -30,14 +30,12 @@ were considered as valuable candidates for being true ORFs.
 
 ## Gather and Cluster all homologous ORFs
 
-## Cluster between the following viruses ORFs :
-
 - Knew LbFV-like dsDNA viruses : ```["LhFV_free","DFV_free","EfFV_free","PoFV_free","PcFV_free"]```
 - Known dsDNA viruses : ```["AcMNPV","LdMNPV","CpV","NeseNPV","CuniNPV","HzNV-1","HzNV-2","GbNV","OrNV","ToNV","DiNV","DmNV_kal","DmNV_tom","DmNV_esp","DmNV_mau","PmNV","HgNV","DhNV","GpSGHV","MdSGHV","LbFV","AmFV"]```
 
 * Snakemake file : **Snakemake_Clustering**
 
-* Script used : **MMseqs2_clust_to_tab.py, mmseqs cluster, mmseqs createcsv**
+* Script used : **Mmmseqs cluster, mmseqs createcsv,Mseqs2_clust_to_tab.py,Create_cluster_files.py**
 
 Important file created : **ALL_Predicted_and_known_ORFs_cluster.tab** (contains all clusters of homologous loci 
 
@@ -53,6 +51,7 @@ Important file created : **ALL_Predicted_and_known_ORFs_cluster.tab** (contains 
 - **Total number of Clusters (orphelins of known viruses removed) : 231/1841**
 - **Total number of orphelins Clusters with new viruses ORFs : 142/231**
 
-
 --------------------
+
+## Annotate proteins 
 
