@@ -49,9 +49,9 @@ Important file created : **ALL_Predicted_and_known_ORFs_cluster.tab** (contains 
 -evalue 0.0001 : To eliminate false positives. 
 --cluster-reassign : During the cascade clustering of Mmseqs2, as the representative of a cluster can change at each iteration, it can happen that some members that were already close to a cluster do not fulfill the clustering criteria anymore. We therefore correct this by reassigning these sequences.
 
-**Total number of Clusters : 1841**
-**Total number of Clusters (orphelins of known viruses removed) : 231/1841**
-**Total number of orphelins Clusters with new viruses ORFs : 142/231**
+- **Total number of Clusters : 1841**
+- **Total number of Clusters (orphelins of known viruses removed) : 231/1841**
+- **Total number of orphelins Clusters with new viruses ORFs : 142/231**
 
 
 --------------------
