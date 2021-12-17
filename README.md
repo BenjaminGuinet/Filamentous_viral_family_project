@@ -14,7 +14,7 @@ The idea of this pipeline is to :
 
 **Programs** : 
 - getorf (version EMBOSS:6.6.0.0)
-- orf_predictor.R 
+- orf_filter.R 
 
 Only open reading frames (ORFs) starting with a methionine and ending with a stop codon, with at least 50 amino acids and with minimal overlap (<23 nucleotides)
 were considered as valuable candidates for being true ORFs
