@@ -30,11 +30,28 @@ were considered as valuable candidates for being true ORFs.
 
 ## Gather and Cluster all homologous ORFs
 
+## Cluster between the following viruses ORFs :
+
+- Knew LbFV-like dsDNA viruses : ["LhFV_free","DFV_free","EfFV_free","PoFV_free","PcFV_free"]
+- Known dsDNA viruses : ["AcMNPV","LdMNPV","CpV","NeseNPV","CuniNPV","HzNV-1","HzNV-2","GbNV","OrNV","ToNV","DiNV","DmNV_kal","DmNV_tom","DmNV_esp","DmNV_mau","PmNV","HgNV","DhNV","GpSGHV","MdSGHV","LbFV","AmFV"]
+
 * Snakemake file : **Snakemake_Clustering**
 
-* Script used : **MMseqs2_clust_to_tab.py**
+* Script used : **MMseqs2_clust_to_tab.py, mmseqs cluster, mmseqs createcsv**
 
 Important file created : **ALL_Predicted_and_known_ORFs_cluster.tab** (contains all clusters of homologous loci 
+
+**Clustering options :** 
+
+--cluster-mode 1 : Connected component clustering that uses the transitive connection to cover more distant homologs.
+--cov-mode 0 : Bidirectional coverage, where only sequences with overlapping sequence lengths greater than 30% of the longer of the two sequences are clustered, 
+#(in this case always the viral sequence since the loci are defined by viral hits). 
+-evalue 0.0001 : To eliminate false positives. 
+--cluster-reassign : During the cascade clustering of Mmseqs2, as the representative of a cluster can change at each iteration, it can happen that some members that were already close to a cluster do not fulfill the clustering criteria anymore. We therefore correct this by reassigning these sequences.
+
+**Total number of Clusters : 1841**
+**Total number of Clusters (orphelins of known viruses removed) : 231/1841**
+**Total number of orphelins Clusters with new viruses ORFs : 142/231**
 
 
 --------------------
