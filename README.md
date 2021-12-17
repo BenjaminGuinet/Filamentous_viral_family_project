@@ -12,12 +12,12 @@ The idea of this pipeline is to :
 
 ## Search for ORFs in the genomes 
 
+Only open reading frames (ORFs) starting with a methionine and ending with a stop codon, with at least 50 amino acids and with minimal overlap (<23 nucleotides)
+were considered as valuable candidates for being true ORFs.
+
 **Programs** : 
 - getorf (version EMBOSS:6.6.0.0)
 - orf_filter.R 
-
-Only open reading frames (ORFs) starting with a methionine and ending with a stop codon, with at least 50 amino acids and with minimal overlap (<23 nucleotides)
-were considered as valuable candidates for being true ORFs
 
 **Output files**
 ```
@@ -26,6 +26,16 @@ were considered as valuable candidates for being true ORFs
 - Virusname_prediction_option_1.fa (Fasta file with predicted filtred ORFs in AminoAcide format) 
 - Virusname_getorf_option_1.fa (Fasta file with predicted ORFs from getorf)
 ```
+------------------
 
-## Clustering of homologous ORFs
+## Gather and Cluster all homologous ORFs
+
+* Snakemake file : **Snakemake_Clustering**
+
+* Script used : **MMseqs2_clust_to_tab.py**
+
+Important file created : **ALL_Predicted_and_known_ORFs_cluster.tab** (contains all clusters of homologous loci 
+
+
+--------------------
 
