@@ -33,7 +33,7 @@ were considered as valuable candidates for being true ORFs.
 ## Cluster between the following viruses ORFs :
 
 - Knew LbFV-like dsDNA viruses : ```["LhFV_free","DFV_free","EfFV_free","PoFV_free","PcFV_free"]```
-- Known dsDNA viruses : ```["AcMNPV","LdMNPV","CpV","NeseNPV","CuniNPV","HzNV-1","HzNV-2","GbNV","OrNV","ToNV","DiNV","DmNV_kal","DmNV_tom","DmNV_esp","DmNV_mau","PmNV","HgNV","DhNV","GpSGHV","MdSGHV","LbFV","AmFV"]
+- Known dsDNA viruses : ```["AcMNPV","LdMNPV","CpV","NeseNPV","CuniNPV","HzNV-1","HzNV-2","GbNV","OrNV","ToNV","DiNV","DmNV_kal","DmNV_tom","DmNV_esp","DmNV_mau","PmNV","HgNV","DhNV","GpSGHV","MdSGHV","LbFV","AmFV"]```
 
 * Snakemake file : **Snakemake_Clustering**
 
