@@ -20,12 +20,12 @@ Only open reading frames (ORFs) starting with a methionine and ending with a sto
 were considered as valuable candidates for being true ORFs
 
 **Output files**
-
+```
 - Virusname_prediction_option_1.pdf (Genomic plot of the filtred predicted ORFs for each contigs)
 - Virusname_prediction_option_1.gff (Gff file with coordinates of each filtred ORFs)
 - Virusname_prediction_option_1.fa (Fasta file with predicted filtred ORFs in AminoAcide format) 
 - Virusname_getorf_option_1.fa (Fasta file with predicted ORFs from getorf)
- 
+```
 
 ## Clustering of homologous ORFs
 
