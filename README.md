@@ -43,11 +43,11 @@ Important file created : **ALL_Predicted_and_known_ORFs_cluster.tab** (contains 
 
 **Clustering options :** 
 
---cluster-mode 1 : Connected component clustering that uses the transitive connection to cover more distant homologs.
---cov-mode 0 : Bidirectional coverage, where only sequences with overlapping sequence lengths greater than 30% of the longer of the two sequences are clustered, 
+- --cluster-mode 1 : Connected component clustering that uses the transitive connection to cover more distant homologs.
+- --cov-mode 0 : Bidirectional coverage, where only sequences with overlapping sequence lengths greater than 30% of the longer of the two sequences are clustered, 
 #(in this case always the viral sequence since the loci are defined by viral hits). 
--evalue 0.0001 : To eliminate false positives. 
---cluster-reassign : During the cascade clustering of Mmseqs2, as the representative of a cluster can change at each iteration, it can happen that some members that were already close to a cluster do not fulfill the clustering criteria anymore. We therefore correct this by reassigning these sequences.
+- --evalue 0.0001 : To eliminate false positives. 
+- --cluster-reassign : During the cascade clustering of Mmseqs2, as the representative of a cluster can change at each iteration, it can happen that some members that were already close to a cluster do not fulfill the clustering criteria anymore. We therefore correct this by reassigning these sequences.
 
 - **Total number of Clusters : 1841**
 - **Total number of Clusters (orphelins of known viruses removed) : 231/1841**
