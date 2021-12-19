@@ -60,7 +60,8 @@ Important file created : **ALL_Predicted_and_known_ORFs_cluster.tab** (contains 
 ```[CDD-3.18,Coils-2.2.1,Gene3D-4.3.0,Hamap-2020_05,MobiDBLite-2.0,PANTHER-15.0,Pfam-34.0,PIRSF-3.10,PIRSR-2021_02,PRINTS-42.0,ProSitePatterns-2021_01,ProSiteProfiles-2021_01,SFLD-4,SMART-7.1,SUPERFAMILY-1.75,TIGRFAM-15.0]```
 
 #Note : see this page if there there is issue between hmmer soft version and the database used : https://github.com/ebi-pf-team/interproscan/issues/173
-#Error example :
+
+Error example :
 
 ```
 Error: File format problem in trying to open HMM file data/gene3d/4.3.0/gene3d_main.hmm.
