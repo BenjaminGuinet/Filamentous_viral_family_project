@@ -73,35 +73,16 @@ Opened data/gene3d/4.3.0/gene3d_main.hmm.h3m, a pressed HMM file; but format of 
 nohup snakemake -j 8000  -s Snakemake_Interproscan  --cluster "sbatch -J {params.name} --mem {params.mem} -p normal -N 1 --cpus-per-task  {params.threads}  -o {params.out} -e {params.err}  " &> nohup_Interproscan_snakemake.out &
 ```
 
+* Snakemake file : **Snakemake_Interproscan**
 
-Important file created : **ALL_Predicted_and_known_ORFs_intrproscan.tsv** (contains all clusters of homologous loci 
+* Script used : **Interproscan, Add_interproscan_and_ontology.py**
 
-A simple tab-delimited file format with the following columns :
+Important file created : **ALL_Predicted_and_known_ORFs_interproscan.tsv** (contains all clusters of homologous loci 
 
-- 1 Protein accession (e.g. P51587)
-- 2 Sequence MD5 digest (e.g. 14086411a2cdf1c4cba63020e1622579)
-- 3 Sequence length (e.g. 3418)
-- 4 Analysis (e.g. Pfam / PRINTS / Gene3D)
-- 5 Signature accession (e.g. PF09103 / G3DSA:2.40.50.140)
-- 6 Signature description (e.g. BRCA2 repeat profile)
-- 7 Start location
-- 8 Stop location
-- 9 Score - is the e-value (or score) of the match reported by member database method (e.g. 3.1E-52)
-- 10 Status - is the status of the match (T: true)
-- 11 Date - is the date of the run
-- 12 InterPro annotations - accession (e.g. IPR002093)
-- 13 InterPro annotations - description (e.g. BRCA2 repeat)
-- 14 (GO annotations (e.g. GO:0005515) - optional column; only displayed if –goterms option is switched on)
+--------------------
 
-```
-df.columns=['Prot_Acc','MD5','Seq_length','Analysis','Signature_acc','Signature_description','Start','End','Score','Status','Date','Interpro_acc','Interpro_description']
+## Align & create phylogny of clusters 
 
-df=df[['Prot_Acc','Analysis','Signature_acc','Signature_description','Score','Status','Interpro_acc','Interpro_description']]
 
-df=df.drop_duplicates(subset=['Prot_Acc','Analysis'], keep="first")
 
-#Stack and unstack then collapse multiindex columns into a one level column
-s=df.set_index(['Prot_Acc','Analysis']).stack().unstack('Prot_Acc').T
-s.columns = [f'{a}_{b}' for a, b in s.columns]
-```
 
