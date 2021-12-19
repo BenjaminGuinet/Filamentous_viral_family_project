@@ -83,6 +83,16 @@ Important file created : **ALL_Predicted_and_known_ORFs_interproscan.tsv** (cont
 
 ## Align & create phylogny of clusters 
 
+```
+nohup snakemake -j 8000  -s Snakemake_Alignment_Phylogny  --cluster "sbatch -J {params.name} --mem {params.mem} -p normal -N 1 --cpus-per-task  {params.threads}  -o {params.out} -e {params.err}  " &> nohup_Alignment_Phylogeny_snakemake.out &
+```
 
+* Snakemake file : **Snakemake_Alignment_Phylogeny**
 
+* Script used : **macse_v2.05.jar, Iqtree-2.1.2**
 
+Important file created :
+- **{cluster_number}_AA.dna** (contains the codon alignment of the ORFs in each clusters )
+- **{cluster_number}_AA.dna.treefile** (contains the phylogenetic tree of the ORFs in each clusters > 2 ORFs )
+
+_________________
