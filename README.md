@@ -81,7 +81,7 @@ Important file created : **ALL_Predicted_and_known_ORFs_interproscan.tsv** (cont
 
 --------------------
 
-## Align & create phylogny of clusters 
+## Align & create phylogeny of clusters 
 
 ```
 nohup snakemake -j 8000  -s Snakemake_Alignment_Phylogeny  --cluster "sbatch -J {params.name} --mem {params.mem} -p normal -N 1 --cpus-per-task  {params.threads}  -o {params.out} -e {params.err}  " &> nohup_Alignment_Phylogeny_snakemake.out &
