@@ -12,9 +12,14 @@ rule Clustering:
       err="/beegfs/data/bguinet/LbFV_family_project/Clustering/Interproscan_ORFs_job.error"
     input:
       Fasta_protein_ORFs= "/beegfs/data/bguinet/LbFV_family_project/Clustering/ALL_Predicted_and_known_ORFs.fa"
+      Cluster_file="/beegfs/data/bguinet/LbFV_family_project/Clustering/ALL_Predicted_and_known_ORFs_cluster.tab"
     output :
       Inteproscan_output= "/beegfs/data/bguinet/LbFV_family_project/Clustering/ALL_Predicted_and_known_ORFs_intrproscan.tsv"
+      Cluster_ontology_output= "/beegfs/data/bguinet/LbFV_family_project/Clustering/ALL_Predicted_and_known_ORFs_cluster_ontology.tab"
     shell:
       """
+      #Run Interproscan analysis 
       /beegfs/data/bguinet/these/interproscan/interproscan-5.53-87.0/interproscan.sh -i {input.Fasta_protein_ORFs} -f tsv -dp -cpu 20 -goterms -o {output.Inteproscan_output}
+      #Add Interproscan analysis and also add Uniprot IDs of the known viral ORFs (you need to install the bioservices function fron Uniprot Package in python)
+      python3 /beegfs/home/bguinet/these_scripts_2/Add_interproscan_and_ontology.py -I {output.Inteproscan_output} -c {input.Cluster_file} -o {output.Cluster_ontology_output}
       """
