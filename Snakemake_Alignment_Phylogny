@@ -1,0 +1,83 @@
+#Usage example on cluster 
+
+nohup snakemake -j 8000  -s Snakemake_Alignment_Phylogny  --cluster "sbatch -J {params.name} --mem {params.mem} -p normal -N 1 --cpus-per-task  {params.threads}  -o {params.out} -e {params.err}  " &> nohup_Alignment_Phylogeny_snakemake.out &
+
+SAMPLES=[]
+for file in os.listdir("/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_seqs/"):
+    if file.endswith(".dna"):
+      Clustername=re.sub(".dna","",file)
+      SAMPLES.append(Clustername)
+
+#If more than 2 taxa : 
+def file_size(filePath):
+    with open(filePath, 'r') as myfile:
+	    data=myfile.read().replace('\n', ' ')
+	    nb=data.count(">")
+            return nb
+#For phylogeny with more than 2 taxas 
+SAMPLES2=[]
+for file in os.listdir("/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_seqs/"):
+    if file.endswith(".dna"):
+      if file_size("/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_seqs/"+file)>2:
+         Clustername=re.sub(".dna","",file)
+         SAMPLES2.append(Clustername)
+	
+
+rule all:
+  input:
+        expand("/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/{cluster_number}_AA.dna", cluster_number = SAMPLES),
+        expand("/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_phylogeny/{cluster_number2}_AA.dna.treefile", cluster_number2 = SAMPLES2)
+
+#Run MACSE analysis 
+rule MACSE_cluster_alignment:
+  params:
+     threads="1",
+     time="62:00:00",
+     name="Codon_alignment_{cluster_number}",
+     out="/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/MACSE_run_{cluster_number}.out",
+     err="/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/MACSE_run_{cluster_number}.error"
+  input:
+     Cluster_file="/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_seqs/{cluster_number}.dna"
+  output: 
+     Alignment_cluster_file="/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/{cluster_number}_AA.dna"
+  shell:
+     """
+     hostname
+     #export JAVA_HOME=/usr/local/jre1.8.0_202/
+     #export PATH=/usr/local/jre1.8.0_202/bin:$PATH
+     cd /beegfs/data/bguinet/these/Cluster_alignment3/Cluster_seqs/
+     #DEST=$(basename {input.Cluster_file})
+     java -jar /beegfs/data/bguinet/TOOLS/macse_v2.05.jar -prog alignSequences -seq {input.Cluster_file} 
+     #DEST_NT=$(echo $DEST | sed 's/.dna/_NT.dna/')
+     #DEST_AA=$(echo $DEST | sed 's/.dna/_AA.dna/')
+     mv /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_seqs/{wildcards.cluster_number}_NT.dna /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/
+     mv /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_seqs/{wildcards.cluster_number}_AA.dna /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/
+     sed -i 's@!@-@g' /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/{wildcards.cluster_number}_AA.dna
+     sed -i 's@!@-@g' /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/{wildcards.cluster_number}_NT.dna
+     #mv /beegfs/data/bguinet/these/Cluster_alignment3/Cluster_seqs/$DEST_AA /beegfs/data/bguinet/these/Cluster_alignment3/Codon_alignment_clusters/
+     """
+
+#Run IQTREE analysis 
+rule Cluster_phylogeny:
+  params:
+    threads="5",
+    time="48:00:00",
+    name="Cluster_phylogeny_{cluster_number2}",
+    out="/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_phylogeny/IQTREE_run_{cluster_number2}.out",
+    err="/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_phylogeny/IQTREE_run_{cluster_number2}.error"
+  input:
+    Cluster_alignment_file="/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/{cluster_number2}_AA.dna"
+  output:
+    Cluster_alignment_output="/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_phylogeny/{cluster_number2}_AA.dna.treefile"
+  shell:
+    """
+    /beegfs/data/bguinet/TOOLS/iqtree-2.1.2-Linux/bin/iqtree2 -s {input.Cluster_alignment_file} -m TEST -alrt 1000  -nt 5 
+    mv /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/{wildcards.cluster_number2}_AA.dna.model.gz /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_phylogeny/
+    mv /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/{wildcards.cluster_number2}_AA.dna.mldist /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_phylogeny/
+    mv /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/{wildcards.cluster_number2}_AA.dna.bionj /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_phylogeny/
+    mv /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/{wildcards.cluster_number2}_AA.dna.treefile /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_phylogeny/
+    mv /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/{wildcards.cluster_number2}_AA.dna.log /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_phylogeny/
+    mv /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/{wildcards.cluster_number2}_AA.dna.iqtree /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_phylogeny/
+    mv /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/{wildcards.cluster_number2}_AA.dna.ckp.gz /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_phylogeny/
+    sed -i 's@____@_+__@g' {output.Cluster_alignment_output}
+    """
