@@ -77,14 +77,14 @@ nohup snakemake -j 8000  -s Snakemake_Interproscan  --cluster "sbatch -J {params
 
 * Script used : **Interproscan, Add_interproscan_and_ontology.py**
 
-Important file created : **ALL_Predicted_and_known_ORFs_interproscan.tsv** (contains all clusters of homologous loci 
+Important file created : **ALL_Predicted_and_known_ORFs_interproscan.tsv** (contains all ORFs with interproscan analysis)
 
 --------------------
 
 ## Align & create phylogny of clusters 
 
 ```
-nohup snakemake -j 8000  -s Snakemake_Alignment_Phylogny  --cluster "sbatch -J {params.name} --mem {params.mem} -p normal -N 1 --cpus-per-task  {params.threads}  -o {params.out} -e {params.err}  " &> nohup_Alignment_Phylogeny_snakemake.out &
+nohup snakemake -j 8000  -s Snakemake_Alignment_Phylogeny  --cluster "sbatch -J {params.name} --mem {params.mem} -p normal -N 1 --cpus-per-task  {params.threads}  -o {params.out} -e {params.err}  " &> nohup_Alignment_Phylogeny_snakemake.out &
 ```
 
 * Snakemake file : **Snakemake_Alignment_Phylogeny**
