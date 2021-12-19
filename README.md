@@ -74,6 +74,22 @@ nohup snakemake -j 8000  -s Snakemake_Interproscan  --cluster "sbatch -J {params
 ```
 
 
+Important file created : **ALL_Predicted_and_known_ORFs_intrproscan.tsv** (contains all clusters of homologous loci 
 
+A simple tab-delimited file format with the following conumns :
 
+- 1 Protein accession (e.g. P51587)
+- 2 Sequence MD5 digest (e.g. 14086411a2cdf1c4cba63020e1622579)
+- 3 Sequence length (e.g. 3418)
+- 4 Analysis (e.g. Pfam / PRINTS / Gene3D)
+- 5 Signature accession (e.g. PF09103 / G3DSA:2.40.50.140)
+- 6 Signature description (e.g. BRCA2 repeat profile)
+- 7 Start location
+- 8 Stop location
+- 9 Score - is the e-value (or score) of the match reported by member database method (e.g. 3.1E-52)
+- 10 Status - is the status of the match (T: true)
+- 11 Date - is the date of the run
+- 12 InterPro annotations - accession (e.g. IPR002093)
+- 13 InterPro annotations - description (e.g. BRCA2 repeat)
+- 14 (GO annotations (e.g. GO:0005515) - optional column; only displayed if –goterms option is switched on)
 
