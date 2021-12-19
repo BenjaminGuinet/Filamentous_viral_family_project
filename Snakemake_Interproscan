@@ -1,0 +1,20 @@
+rule all:
+  input:
+    "/beegfs/data/bguinet/LbFV_family_project/Clustering/ALL_Predicted_and_known_ORFs_intrproscan.tsv"
+
+rule Clustering:
+    params:
+      threads="16",
+      mem="12G",
+      time="12:00:00",
+      name="Interproscan_analysis_on_Viral_ORfs",
+      out="/beegfs/data/bguinet/LbFV_family_project/Clustering/Interproscan_ORFs_job.out",
+      err="/beegfs/data/bguinet/LbFV_family_project/Clustering/Interproscan_ORFs_job.error"
+    input:
+      Fasta_protein_ORFs= "/beegfs/data/bguinet/LbFV_family_project/Clustering/ALL_Predicted_and_known_ORFs.fa"
+    output :
+      Inteproscan_output= "/beegfs/data/bguinet/LbFV_family_project/Clustering/ALL_Predicted_and_known_ORFs_intrproscan.tsv"
+    shell:
+      """
+      /beegfs/data/bguinet/these/interproscan/interproscan-5.53-87.0/interproscan.sh -i {input.Fasta_protein_ORFs} -f tsv -dp -cpu 20 -goterms -o {output.Inteproscan_output}
+      """
