@@ -1,6 +1,7 @@
 rule all:
   input:
-    "/beegfs/data/bguinet/LbFV_family_project/Clustering/ALL_Predicted_and_known_ORFs_intrproscan.tsv"
+    "/beegfs/data/bguinet/LbFV_family_project/Clustering/ALL_Predicted_and_known_ORFs_intrproscan.tsv",
+    "/beegfs/data/bguinet/LbFV_family_project/Clustering/ALL_Predicted_and_known_ORFs_cluster_ontology.tab"
 
 rule Clustering:
     params:
