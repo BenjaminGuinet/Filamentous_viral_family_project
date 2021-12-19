@@ -93,3 +93,15 @@ A simple tab-delimited file format with the following columns :
 - 13 InterPro annotations - description (e.g. BRCA2 repeat)
 - 14 (GO annotations (e.g. GO:0005515) - optional column; only displayed if –goterms option is switched on)
 
+```
+df.columns=['Prot_Acc','MD5','Seq_length','Analysis','Signature_acc','Signature_description','Start','End','Score','Status','Date','Interpro_acc','Interpro_description']
+
+df=df[['Prot_Acc','Analysis','Signature_acc','Signature_description','Score','Status','Interpro_acc','Interpro_description']]
+
+df=df.drop_duplicates(subset=['Prot_Acc','Analysis'], keep="first")
+
+#Stack and unstack then collapse multiindex columns into a one level column
+s=df.set_index(['Prot_Acc','Analysis']).stack().unstack('Prot_Acc').T
+s.columns = [f'{a}_{b}' for a, b in s.columns]
+```
+
