@@ -62,6 +62,10 @@ rule Clustering:
       /beegfs/data/bguinet/TOOLS/mmseqs/bin/mmseqs cluster /beegfs/data/bguinet/LbFV_family_project/Clustering/ALL_Predicted_and_known_ORFs_db /beegfs/data/bguinet/LbFV_family_project/Clustering/ALL_Predicted_and_known_ORFs_cluster /beegfs/data/bguinet/LbFV_family_project/Clustering/ALL_Predicted_and_known_ORFs_tpm --threads 10 -s 7.5 --cluster-mode 1 --cov-mode 0 -c 0.30 -e 0.0001
 
       /beegfs/data/bguinet/TOOLS/mmseqs/bin/mmseqs createtsv /beegfs/data/bguinet/LbFV_family_project/Clustering/ALL_Predicted_and_known_ORFs_db /beegfs/data/bguinet/LbFV_family_project/Clustering/ALL_Predicted_and_known_ORFs_db /beegfs/data/bguinet/LbFV_family_project/Clustering/ALL_Predicted_and_known_ORFs_cluster {output.Clustering_output}
-
+      
+      #Transforme results 
       python3 /beegfs/home/bguinet/these_scripts_2/MMseqs2_clust_to_tab.py -f {output.Clustering_output} -o {output.Clustering_filtred_output}
+      
+      #Create clusters 
+      python3 /beegfs/home/bguinet/these_scripts_2/Create_cluster_files.py -c /beegfs/data/bguinet/LbFV_family_project/Clustering/ALL_Predicted_and_known_ORFs_cluster.tab -AA /beegfs/data/bguinet/LbFV_family_project/Clustering/ALL_Predicted_and_known_ORFs.fa -o /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_seqs/
       """
