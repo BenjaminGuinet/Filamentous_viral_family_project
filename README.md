@@ -76,7 +76,7 @@ nohup snakemake -j 8000  -s Snakemake_Interproscan  --cluster "sbatch -J {params
 
 Important file created : **ALL_Predicted_and_known_ORFs_intrproscan.tsv** (contains all clusters of homologous loci 
 
-A simple tab-delimited file format with the following conumns :
+A simple tab-delimited file format with the following columns :
 
 - 1 Protein accession (e.g. P51587)
 - 2 Sequence MD5 digest (e.g. 14086411a2cdf1c4cba63020e1622579)
