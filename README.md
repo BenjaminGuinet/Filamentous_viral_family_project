@@ -96,3 +96,44 @@ Important file created :
 - **{cluster_number}_AA.dna.treefile** (contains the phylogenetic tree of the ORFs in each clusters > 2 ORFs )
 
 _________________
+
+
+## Concatenate phylogeny analysis 
+
+#First we need to create new cluster alignment file with same tips names 
+
+```
+import os 
+from Bio import SeqIO 
+
+for filename in os.listdir(directory):
+  if "_AA.dna" in filename:
+    clustername= re.sub("_AA.dna","",filename)
+    nb_viruses=0
+    record=record_dict = SeqIO.to_dict(SeqIO.parse(filename, "fasta"))
+    nb_viruses=len(record)
+    if nb_viruses > 4:
+      with open("/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/"+clustername+"_AA2.dna","w") as output:
+          viruses_added_to_cluster=[]
+          for i in record:
+            for viruse in viruses:
+              if viruse in record[i].id:
+                if viruse not in viruses_added_to_cluster:
+                  viruses_added_to_cluster.append(viruse)
+                  print('>',viruse,sep="",file=output)
+                  print(record[i].seq,file=output)
+```
+
+Then we need to concatenate those files :
+
+```
+cd /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/
+perl /beegfs/home/bguinet/these_scripts_2/catfasta2phyml.pl -f --concatenate --verbose *_AA2.dna  > /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/Concatenated_sequences.aln  2> partitions.txt
+
+#Run the phylogeny
+/beegfs/data/bguinet/Bguinet_conda/bin/iqtree -s /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/Concatenated_sequences.aln -spp /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/partitions.tab -m TEST -alrt 1000  -bb 1000  -nt 20
+```
+
+/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/*_AA.dna 
+
+
