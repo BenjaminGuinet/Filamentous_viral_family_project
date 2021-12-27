@@ -60,9 +60,11 @@ Important file created : **ALL_Predicted_and_known_ORFs_cluster.tab** (contains 
 /beegfs/data/bguinet/TOOLS/mmseqs/bin/mmseqs search ALL_Predicted_and_known_ORFs_db ALL_Predicted_and_known_ORFs_db All_versus_All_Predicted_and_known_ORFs tpm_All_versus_All_Predicted_and_known_ORFs -s 7.5 -e 0.001 --threads 20
 
 /beegfs/data/bguinet/TOOLS/mmseqs/bin/mmseqs convertalis --format-output 'query,target,pident,alnlen,mismatch,gapopen,qstart,qend,tstart,tend,evalue,bits,tlen' ALL_Predicted_and_known_ORFs_db ALL_Predicted_and_known_ORFs_db All_versus_All_Predicted_and_known_ORFs All_versus_All_Predicted_and_known_ORFs.m8
+
 ```
 import networkx as nx
 import pandas as pd 
+import numpy as np
 
 df=pd.read_csv("All_versus_All_Predicted_and_known_ORFs.m8",sep="\t")
 
@@ -118,8 +120,9 @@ cluster = cluster.loc[:, ~cluster.columns.str.startswith('LbFV_')]
 cluster['ORF_numbers'] = cluster['ORFs_values'].str.replace('.*_ORF','').astype(int)
 cluster.sort_values(by='ORF_numbers', ascending=True,inplace=True)
 
-cluster=cluster[['ORFs_values', 'Cluster', 'LhFV', 'DFV','EfFV','PoFV','PcFV','CpV', 'CuniNPV', 'DhNV', 'DiNV', 'DmNV_esp', 'DmNV_kal', 'DmNV_mau', 'DmNV_tom', 'GbNV', 'GpSGHV', 'HgNV', 'HzNV-1', 'HzNV-2', 'LdMNPV','MdSGHV', 'NeseNPV', 'OrNV',  'PmNV',  'ToNV','AcMNPV','AmFV']]
-cluster[['ORFs_values', 'Cluster', 'LhFV', 'DFV','EfFV','PoFV','PcFV']]
+cluster=cluster[['ORFs_values', 'Cluster', 'LhFV', 'DFV','EfFV','PoFV','PcFV','CcFV1','CcFV2','CpV', 'CuniNPV', 'DhNV', 'DiNV', 'DmNV_esp', 'DmNV_kal', 'DmNV_mau', 'DmNV_tom', 'GbNV', 'GpSGHV', 'HgNV', 'HzNV-1', 'HzNV-2', 'LdMNPV','MdSGHV', 'NeseNPV', 'OrNV',  'PmNV',  'ToNV','AcMNPV','AmFV']]
+
+cluster[['ORFs_values', 'Cluster', 'LhFV', 'DFV','EfFV','PoFV','PcFV','CcFV1','CcFV2']]
 
 
 
