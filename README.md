@@ -54,6 +54,77 @@ Important file created : **ALL_Predicted_and_known_ORFs_cluster.tab** (contains 
 - **Total number of Clusters (orphelins of known viruses removed) : 231/1841**
 - **Total number of orphelins Clusters with new viruses ORFs : 142/231**
 
+
+#All versus all 
+
+/beegfs/data/bguinet/TOOLS/mmseqs/bin/mmseqs search ALL_Predicted_and_known_ORFs_db ALL_Predicted_and_known_ORFs_db All_versus_All_Predicted_and_known_ORFs tpm_All_versus_All_Predicted_and_known_ORFs -s 7.5 -e 0.001 --threads 20
+
+/beegfs/data/bguinet/TOOLS/mmseqs/bin/mmseqs convertalis --format-output 'query,target,pident,alnlen,mismatch,gapopen,qstart,qend,tstart,tend,evalue,bits,tlen' ALL_Predicted_and_known_ORFs_db ALL_Predicted_and_known_ORFs_db All_versus_All_Predicted_and_known_ORFs All_versus_All_Predicted_and_known_ORFs.m8
+```
+import networkx as nx
+import pandas as pd 
+
+df=pd.read_csv("All_versus_All_Predicted_and_known_ORFs.m8",sep="\t")
+
+df=df.loc[df['bits'].ge(50)]
+# Create the graph from the dataframe
+g = nx.Graph()
+
+g.add_edges_from(df[['query','target']].itertuples(index=False))
+new = list(nx.connected_components(g))
+
+mapped =  {node: f'Cluster{cid + 1}' for cid, component in enumerate(new) for node in component}
+
+cluster = pd.DataFrame({'Cluster': mapped.values(), 'Names':mapped.keys()})
+
+cluster.to_csv("All_versus_All_Predicted_and_known_ORFs_clustered.m8",sep=";",index=False)
+
+#Create binary table 
+
+List_viruses_name=["AcMNPV","LdMNPV","CpV","NeseNPV","CuniNPV","HzNV-1","HzNV-2","GbNV","OrNV","ToNV","DiNV","DmNV_kal","DmNV_tom","DmNV_esp","DmNV_mau","PmNV","HgNV","DhNV","GpSGHV","MdSGHV","LbFV","AmFV","PoFV","LhFV","PcFV","EfFV","DFV","CcFV1","CcFV2"]
+
+#cluster="ALL_Predicted_and_known_ORFs_cluster.tab"
+#cluster=pd.read_csv(cluster,header=0,sep="\t")
+cluster['Names2'] =  cluster['Names'].str.replace('.*_\\+_|.*_-_','')
+
+cluster['Names2'] = cluster['Names'].str.extract(f'({"|".join(List_viruses_name)})', expand=False)
+
+#Load LbFV ORFs number table 
+
+ORF_table = pd.read_csv("/beegfs/data/bguinet/LbFV_family_project/Clustering/LbFV_protein_ORF_names.txt",sep="\t")
+
+cluster= cluster.merge(ORF_table,on='Names',how='outer')
+
+cluster['Names2']=cluster['Names2'].replace('LbFV', np.nan)
+
+cluster.Names2.fillna(cluster.New, inplace=True)
+del cluster['New']
+del cluster['Names']
+
+List_ORFs=list(ORF_table['New'])
+
+m = cluster['Names2'].isin(List_ORFs)
+cluster['ORFs_values'] = cluster['Names2'].where(m).groupby(cluster['Cluster']).ffill()
+cluster['ORFs_values']=cluster.groupby(['Cluster'])['ORFs_values'].apply(lambda x:x.ffill().bfill())
+    
+cluster = (pd.get_dummies(cluster.dropna(subset=['ORFs_values']), 
+                     columns=['Names2'], 
+                     prefix='', 
+                     prefix_sep='')
+        .groupby(['ORFs_values','Cluster'], as_index=False)
+        .max())
+cluster = cluster.loc[:, ~cluster.columns.str.startswith('LbFV_')]
+
+cluster['ORF_numbers'] = cluster['ORFs_values'].str.replace('.*_ORF','').astype(int)
+cluster.sort_values(by='ORF_numbers', ascending=True,inplace=True)
+
+cluster=cluster[['ORFs_values', 'Cluster', 'LhFV', 'DFV','EfFV','PoFV','PcFV','CpV', 'CuniNPV', 'DhNV', 'DiNV', 'DmNV_esp', 'DmNV_kal', 'DmNV_mau', 'DmNV_tom', 'GbNV', 'GpSGHV', 'HgNV', 'HzNV-1', 'HzNV-2', 'LdMNPV','MdSGHV', 'NeseNPV', 'OrNV',  'PmNV',  'ToNV','AcMNPV','AmFV']]
+cluster[['ORFs_values', 'Cluster', 'LhFV', 'DFV','EfFV','PoFV','PcFV']]
+
+
+
+
+
 --------------------
 
 ## Annotate proteins 
@@ -74,6 +145,10 @@ Opened data/gene3d/4.3.0/gene3d_main.hmm.h3m, a pressed HMM file; but format of 
 #Run snakemake on cluster 
 ```
 nohup snakemake -j 8000  -s Snakemake_Interproscan  --cluster "sbatch -J {params.name} --mem {params.mem} -p normal -N 1 --cpus-per-task  {params.threads}  -o {params.out} -e {params.err}  " &> nohup_Interproscan_snakemake.out &
+
+python3 /beegfs/home/bguinet/these_scripts_2/Add_interproscan_and_ontology.py -I ALL_Predicted_and_known_ORFs_intrproscan.tsv -c ALL_Predicted_and_known_ORFs_cluster.tab -o ALL_Predicted_and_known_ORFs_cluster_ontology.tab
+
+
 ```
 
 * Snakemake file : **Snakemake_Interproscan**
@@ -97,6 +172,32 @@ nohup snakemake -j 8000  -s Snakemake_Alignment_Phylogeny  --cluster "sbatch -J 
 Important file created :
 - **{cluster_number}_AA.dna** (contains the codon alignment of the ORFs in each clusters )
 - **{cluster_number}_AA.dna.treefile** (contains the phylogenetic tree of the ORFs in each clusters > 2 ORFs )
+
+
+The FLV clusters ontologies 
+
+
+tab=pd.read_csv("ALL_Predicted_and_known_ORFs_cluster_ontology.tab",sep=";")
+
+tab=tab.loc[tab['Names'].str.contains("FV")]
+tab=tab.loc[~tab['Names'].str.contains("AmFV")]
+
+
+ok
+
+tab[['Clustername','Gene names','Protein names','PANTHER_Interpro_description','CDD_Interpro_description','Pfam_Interpro_description','TIGRFAM_Interpro_description','ProSiteProfiles_Interpro_description','Pfam_Signature_description','PIRSF_Interpro_description','Pfam_Interpro_description','SMART_Signature_description]]
+
+tab = tab[tab['Gene names'].notna() |tab['Protein names'].notna() | tab['PANTHER_Interpro_description'].notna() |tab['Hamap_Interpro_description'].notna() |tab['CDD_Interpro_description'].notna() |tab['Pfam_Interpro_description'].notna() |tab['TIGRFAM_Interpro_description'].notna() |tab['ProSiteProfiles_Interpro_description'].notna() | tab['Pfam_Signature_description'].notna() | tab['PIRSF_Interpro_description'].notna()|tab['Pfam_Interpro_description'].notna() | tab['SMART_Signature_description'].notna()  ]
+
+Hamap_Interpro_description
+
+
+
+tab[['Gene names','Protein names','PANTHER_Interpro_description','Hamap_Interpro_description']
+#Keep only cluster with at leats one ontology assignation
+
+
+tab.loc[Cluster','Names','Gene names', 'Protein names','PANTHER_Interpro_description','Hamap_Interpro_description','CDD_Interpro_description','Pfam_Interpro_description','TIGRFAM_Interpro_description']]
 
 _________________
 
