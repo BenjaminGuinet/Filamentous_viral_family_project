@@ -218,8 +218,12 @@ _________________
 
 ```
 import os 
+import re 
 from Bio import SeqIO 
 
+viruses = ["AcMNPV","LdMNPV","CpV","NeseNPV","CuniNPV","HzNV-1","HzNV-2","GbNV","OrNV","ToNV","DiNV","DmNV_kal","DmNV_tom","DmNV_esp","DmNV_mau","PmNV","HgNV","DhNV","GpSGHV","MdSGHV","LbFV","AmFV","PoFV","LhFV","PcFV","EfFV","DFV","CcFV1","CcFV2"]
+
+directory="/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/"
 for filename in os.listdir(directory):
   if "_AA.dna" in filename:
     clustername= re.sub("_AA.dna","",filename)
@@ -227,7 +231,7 @@ for filename in os.listdir(directory):
     record=record_dict = SeqIO.to_dict(SeqIO.parse(filename, "fasta"))
     nb_viruses=len(record)
     if nb_viruses > 4:
-      with open("/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/"+clustername+"_AA2.dna","w") as output:
+      with open(directory+clustername+"_AA2.dna","w") as output:
           viruses_added_to_cluster=[]
           for i in record:
             for viruse in viruses:
@@ -245,7 +249,10 @@ cd /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/
 perl /beegfs/home/bguinet/these_scripts_2/catfasta2phyml.pl -f --concatenate --verbose *_AA2.dna  > /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/Concatenated_sequences.aln  2> partitions.txt
 
 #Run the phylogeny
-/beegfs/data/bguinet/Bguinet_conda/bin/iqtree -s /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/Concatenated_sequences.aln -spp /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/partitions.tab -m TEST -alrt 1000  -bb 1000  -nt 20
+
+/beegfs/data/bguinet/Bguinet_conda/bin/iqtree -s /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/Concatenated_sequences.aln -spp /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/partitions.tab -m TEST -alrt 1000  -bb 1000  -nt 25
+
+
 ```
 
 /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/*_AA.dna 
