@@ -56,10 +56,14 @@ Important file created : **ALL_Predicted_and_known_ORFs_cluster.tab** (contains 
 
 
 #All versus all 
-
+```
 /beegfs/data/bguinet/TOOLS/mmseqs/bin/mmseqs search ALL_Predicted_and_known_ORFs_db ALL_Predicted_and_known_ORFs_db All_versus_All_Predicted_and_known_ORFs tpm_All_versus_All_Predicted_and_known_ORFs -s 7.5 -e 0.001 --threads 20
 
 /beegfs/data/bguinet/TOOLS/mmseqs/bin/mmseqs convertalis --format-output 'query,target,pident,alnlen,mismatch,gapopen,qstart,qend,tstart,tend,evalue,bits,tlen' ALL_Predicted_and_known_ORFs_db ALL_Predicted_and_known_ORFs_db All_versus_All_Predicted_and_known_ORFs All_versus_All_Predicted_and_known_ORFs.m8
+
+```
+
+Clustering 
 
 ```
 import networkx as nx
@@ -83,7 +87,7 @@ cluster.to_csv("All_versus_All_Predicted_and_known_ORFs_clustered.m8",sep=";",in
 
 #Create binary table 
 
-List_viruses_name=["AcMNPV","LdMNPV","CpV","NeseNPV","CuniNPV","HzNV-1","HzNV-2","GbNV","OrNV","ToNV","DiNV","DmNV_kal","DmNV_tom","DmNV_esp","DmNV_mau","PmNV","HgNV","DhNV","GpSGHV","MdSGHV","LbFV","AmFV","PoFV","LhFV","PcFV","EfFV","DFV","CcFV1","CcFV2"]
+List_viruses_name=["AcMNPV","LdMNPV","CpV","NeseNPV","CuniNPV","HzNV-1","HzNV-2","GbNV","OrNV","ToNV","DiNV","DmNV_kal","DmNV_tom","DmNV_esp","DmNV_mau","PmNV","HgNV","DhNV","GpSGHV","MdSGHV","LbFV","AmFV","PoFV","LhFV","PcFV","EfFV","DFV","CcFV1","CcFV2","WSSV","CoBV"]
 
 #cluster="ALL_Predicted_and_known_ORFs_cluster.tab"
 #cluster=pd.read_csv(cluster,header=0,sep="\t")
@@ -109,7 +113,7 @@ m = cluster['Names2'].isin(List_ORFs)
 
 f = lambda x: [y for y in x if y]
 
-cluster['ORFs_values'] = cluster['Cluster'].map(df['Names2'].where(m, '').groupby(cluster['Cluster']).agg(f))
+cluster['ORFs_values'] = cluster['Cluster'].map(cluster['Names2'].where(m, '').groupby(cluster['Cluster']).agg(f))
 
 cluster = cluster.explode('ORFs_values')
 
@@ -123,11 +127,10 @@ cluster = (pd.get_dummies(cluster.dropna(subset=['ORFs_values']),
 cluster = cluster.loc[:, ~cluster.columns.str.startswith('LbFV_')]
 
 
-
 cluster['ORF_numbers'] = cluster['ORFs_values'].str.replace('.*_ORF','').astype(int)
 cluster.sort_values(by='ORF_numbers', ascending=True,inplace=True)
 
-cluster=cluster[['ORFs_values', 'Cluster', 'LhFV', 'DFV','EfFV','PoFV','PcFV','CcFV1','CcFV2','CpV', 'CuniNPV', 'DhNV', 'DiNV', 'DmNV_esp', 'DmNV_kal', 'DmNV_mau', 'DmNV_tom', 'GbNV', 'GpSGHV', 'HgNV', 'HzNV-1', 'HzNV-2', 'LdMNPV','MdSGHV', 'NeseNPV', 'OrNV',  'PmNV',  'ToNV','AcMNPV','AmFV']]
+cluster=cluster[['ORFs_values', 'Cluster', 'LhFV', 'DFV','EfFV','PoFV','PcFV','CcFV1','CcFV2','CpV', 'CuniNPV', 'DhNV', 'DiNV', 'DmNV_esp', 'DmNV_kal', 'DmNV_mau', 'DmNV_tom', 'GbNV', 'GpSGHV', 'HgNV', 'HzNV-1', 'HzNV-2', 'LdMNPV','MdSGHV', 'NeseNPV', 'OrNV',  'PmNV',  'ToNV','AcMNPV','AmFV',"WSSV","CoBV"]]
 
 cluster[['ORFs_values', 'Cluster', 'LhFV', 'DFV','EfFV','PoFV','PcFV','CcFV1','CcFV2']]
 
@@ -221,7 +224,7 @@ import os
 import re 
 from Bio import SeqIO 
 
-viruses = ["AcMNPV","LdMNPV","CpV","NeseNPV","CuniNPV","HzNV-1","HzNV-2","GbNV","OrNV","ToNV","DiNV","DmNV_kal","DmNV_tom","DmNV_esp","DmNV_mau","PmNV","HgNV","DhNV","GpSGHV","MdSGHV","LbFV","AmFV","PoFV","LhFV","PcFV","EfFV","DFV","CcFV1","CcFV2"]
+viruses = ['LhFV', 'DFV','EfFV','PoFV','PcFV','CcFV1','CcFV2','CpV', 'CuniNPV', 'DhNV', 'DiNV', 'DmNV_esp', 'DmNV_kal', 'DmNV_mau', 'DmNV_tom', 'GbNV', 'GpSGHV', 'HgNV', 'HzNV-1', 'HzNV-2', 'LdMNPV','MdSGHV', 'NeseNPV', 'OrNV',  'PmNV',  'ToNV','AcMNPV','AmFV',"WSSV","CoBV"]
 
 directory="/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/"
 for filename in os.listdir(directory):
@@ -231,7 +234,7 @@ for filename in os.listdir(directory):
     record=record_dict = SeqIO.to_dict(SeqIO.parse(filename, "fasta"))
     nb_viruses=len(record)
     if nb_viruses > 4:
-      with open(directory+clustername+"_AA2.dna","w") as output:
+      with open("/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/"+clustername+"_AA2.dna","w") as output:
           viruses_added_to_cluster=[]
           for i in record:
             for viruse in viruses:
@@ -249,10 +252,12 @@ cd /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/
 perl /beegfs/home/bguinet/these_scripts_2/catfasta2phyml.pl -f --concatenate --verbose *_AA2.dna  > /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/Concatenated_sequences.aln  2> partitions.txt
 
 #Run the phylogeny
-
-/beegfs/data/bguinet/Bguinet_conda/bin/iqtree -s /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/Concatenated_sequences.aln -spp /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/partitions.tab -m TEST -alrt 1000  -bb 1000  -nt 25
-
-
+#!/bin/bash
+#SBATCH --time=12:00:00
+#SBATCH --cpus-per-task=10
+#SBATCH -e /beegfs/data/bguinet/LbFV_family_project/Clustering/dsDNA_phylogeny_log.error
+#SBATCH -o /beegfs/data/bguinet/LbFV_family_project/ClusteringdsDNA_phylogeny/_log.out
+/beegfs/data/bguinet/Bguinet_conda/bin/iqtree -s /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/Concatenated_sequences.aln -spp /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/partitions.tab -m TEST -alrt 1000  -bb 1000  -nt 10
 ```
 
 /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/*_AA.dna 
