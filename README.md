@@ -106,16 +106,23 @@ del cluster['Names']
 List_ORFs=list(ORF_table['New'])
 
 m = cluster['Names2'].isin(List_ORFs)
-cluster['ORFs_values'] = cluster['Names2'].where(m).groupby(cluster['Cluster']).ffill()
-cluster['ORFs_values']=cluster.groupby(['Cluster'])['ORFs_values'].apply(lambda x:x.ffill().bfill())
-    
+
+f = lambda x: [y for y in x if y]
+
+cluster['ORFs_values'] = cluster['Cluster'].map(df['Names2'].where(m, '').groupby(cluster['Cluster']).agg(f))
+
+cluster = cluster.explode('ORFs_values')
+
 cluster = (pd.get_dummies(cluster.dropna(subset=['ORFs_values']), 
                      columns=['Names2'], 
                      prefix='', 
                      prefix_sep='')
         .groupby(['ORFs_values','Cluster'], as_index=False)
         .max())
+        
 cluster = cluster.loc[:, ~cluster.columns.str.startswith('LbFV_')]
+
+
 
 cluster['ORF_numbers'] = cluster['ORFs_values'].str.replace('.*_ORF','').astype(int)
 cluster.sort_values(by='ORF_numbers', ascending=True,inplace=True)
