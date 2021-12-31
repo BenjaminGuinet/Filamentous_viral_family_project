@@ -224,7 +224,7 @@ import os
 import re 
 from Bio import SeqIO 
 
-viruses = ['LhFV', 'DFV','EfFV','PoFV','PcFV','CcFV1','CcFV2','CpV', 'CuniNPV', 'DhNV', 'DiNV', 'DmNV_esp', 'DmNV_kal', 'DmNV_mau', 'DmNV_tom', 'GbNV', 'GpSGHV', 'HgNV', 'HzNV-1', 'HzNV-2', 'LdMNPV','MdSGHV', 'NeseNPV', 'OrNV',  'PmNV',  'ToNV','AcMNPV','AmFV',"WSSV","CoBV"]
+viruses = ['LhFV', 'DFV','EfFV','PoFV','PcFV','CcFV1','CcFV2','CpV', 'CuniNPV', 'DhNV', 'DiNV', 'DmNV_esp', 'DmNV_kal', 'DmNV_mau', 'DmNV_tom', 'GbNV', 'GpSGHV', 'HgNV', 'HzNV-1', 'HzNV-2', 'LdMNPV','MdSGHV', 'NeseNPV', 'OrNV',  'PmNV',  'ToNV','AcMNPV','AmFV',"WSSV","CoBV","Aphidius_colemani","Eupelmus_kiefferi","Pseudomyrmex_gracilis","Aphaenogaster_picea","Microplitis_demolitor","Cotesia_vestalis","Harpegnathos_saltator","Venturia_canescens","Fopius_arisanus","Compopleginae","Leptopilina_boulardi","Leptopilina_clavipes","Leptopilina_heterotoma","Leptopilina_boulardi"]
 
 directory="/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/"
 for filename in os.listdir(directory):
@@ -243,13 +243,36 @@ for filename in os.listdir(directory):
                   viruses_added_to_cluster.append(viruse)
                   print('>',viruse,sep="",file=output)
                   print(record[i].seq,file=output)
+                  
+                  
+directory="/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/"
+for filename in os.listdir(directory):
+  if "_NT.dna" in filename:
+    clustername= re.sub("_NT.dna","",filename)
+    nb_viruses=0
+    record=record_dict = SeqIO.to_dict(SeqIO.parse(filename, "fasta"))
+    nb_viruses=len(record)
+    if nb_viruses > 4:
+      with open("/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/"+clustername+"_NT2.dna","w") as output:
+          viruses_added_to_cluster=[]
+          for i in record:
+            for viruse in viruses:
+              if viruse in record[i].id:
+                if viruse not in viruses_added_to_cluster:
+                  viruses_added_to_cluster.append(viruse)
+                  print('>',viruse,sep="",file=output)
+                  print(record[i].seq,file=output)                  
 ```
+
+
+for file in /beegfs/data/bguinet/these/dsDNA_virus_phylogeny2/Cluster_alignment/Cluster*_AA2.dna; do /beegfs/data/bguinet/TOOLS/trimal/source/trimal -in $file -automated1 -resoverlap 0.30 -seqoverlap 30 -fasta  -out $file.cleaned; done 
+
 
 Then we need to concatenate those files :
 
 ```
 cd /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/
-perl /beegfs/home/bguinet/these_scripts_2/catfasta2phyml.pl -f --concatenate --verbose *_AA2.dna  > /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/Concatenated_sequences.aln  2> partitions.txt
+perl /beegfs/home/bguinet/these_scripts_2/catfasta2phyml.pl -f --concatenate --verbose *_AA2.dna.cleaned  > /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/Concatenated_sequences.aln  2> partitions.txt
 
 #Run the phylogeny
 #!/bin/bash
