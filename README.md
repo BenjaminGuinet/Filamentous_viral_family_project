@@ -57,9 +57,41 @@ Important file created : **ALL_Predicted_and_known_ORFs_cluster.tab** (contains 
 
 #All versus all 
 ```
+
+from Bio import SeqIO 
+#First add all predicted ORFs within a common file : 
+List_viruses_name=["PoFV","LhFV","PcFV","EfFV","DFV","CcFV1","CcFV2"]
+
+with open("/beegfs/data/bguinet/LbFV_family_project/Clustering/ALL_Predicted_ORFs.fa","w") as output:
+  for viruse in List_viruses_name:
+    record_seq=SeqIO.parse("/beegfs/data/bguinet/LbFV_family_project/Genomes/"+viruse+"_free/Predicted_orfs/"+viruse+"_free_prediction_option_1.fa", "fasta")
+    for record in record_seq:
+      if (
+      if viruse in record.id:
+        print('>',record.id,sep="",file=output)
+        print(record.seq,file=output)
+      else:
+        print('>',record.id,"_",viruse,sep="",file=output)
+        print(record.seq,file=output)
+
+ 
+import re
+###Add known viruses 
+with open("/beegfs/data/bguinet/LbFV_family_project/Clustering/ALL_Predicted_and_known_ORFs.fa","w") as output:
+  for known_virus in SeqIO.parse("/beegfs/data/bguinet/LbFV_family_project/Clustering/ALL_known_ORFs.fna", "fasta"):
+      print(">",known_virus.id,sep="",file=output)
+      print(re.sub("\\*","",str(known_virus.seq.translate())),file=output)
+  for predicted_orf in SeqIO.parse("/beegfs/data/bguinet/LbFV_family_project/Clustering/ALL_Predicted_ORFs.fa", "fasta"):
+      print(">",predicted_orf.id,sep="",file=output)
+      print(predicted_orf.seq,file=output)
+
+#back to bash 
+
+/beegfs/data/bguinet/TOOLS/mmseqs/bin/mmseqs createdb /beegfs/data/bguinet/LbFV_family_project/Clustering/ALL_Predicted_and_known_ORFs.fa /beegfs/data/bguinet/LbFV_family_project/Clustering/ALL_Predicted_and_known_ORFs_db
+
 /beegfs/data/bguinet/TOOLS/mmseqs/bin/mmseqs search ALL_Predicted_and_known_ORFs_db ALL_Predicted_and_known_ORFs_db All_versus_All_Predicted_and_known_ORFs tpm_All_versus_All_Predicted_and_known_ORFs -s 7.5 -e 0.001 --threads 20
 
-/beegfs/data/bguinet/TOOLS/mmseqs/bin/mmseqs convertalis --format-output 'query,target,pident,alnlen,mismatch,gapopen,qstart,qend,tstart,tend,evalue,bits,tlen' ALL_Predicted_and_known_ORFs_db ALL_Predicted_and_known_ORFs_db All_versus_All_Predicted_and_known_ORFs All_versus_All_Predicted_and_known_ORFs.m8
+/beegfs/data/bguinet/TOOLS/mmseqs/bin/mmseqs convertalis --format-output 'query,target,pident,alnlen,mismatch,gapopen,qstart,qend,tstart,tend,evalue,bits,tlen,tcov,qcov' ALL_Predicted_and_known_ORFs_db ALL_Predicted_and_known_ORFs_db All_versus_All_Predicted_and_known_ORFs All_versus_All_Predicted_and_known_ORFs.m8
 
 ```
 
@@ -70,9 +102,11 @@ import networkx as nx
 import pandas as pd 
 import numpy as np
 
-df=pd.read_csv("All_versus_All_Predicted_and_known_ORFs.m8",sep="\t")
+df=pd.read_csv("/beegfs/data/bguinet/LbFV_family_project/Clustering/All_versus_All_Predicted_and_known_ORFs.m8",sep="\t")
 
-df=df.loc[df['bits'].ge(50)]
+df=df.loc[df['qcov'].ge(0.15) | df['tcov'].ge(0.15) ]
+df=df.loc[df['bits'].gt(40)]
+
 # Create the graph from the dataframe
 g = nx.Graph()
 
@@ -272,7 +306,7 @@ Then we need to concatenate those files :
 
 ```
 cd /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/
-perl /beegfs/home/bguinet/these_scripts_2/catfasta2phyml.pl -f --concatenate --verbose *_AA2.dna.cleaned  > /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/Concatenated_sequences.aln  2> partitions.txt
+perl /beegfs/home/bguinet/these_scripts_2/catfasta2phyml.pl -f --concatenate --verbose *_nodup_more_then_5_taxa.ali.trimmed  > /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/Concatenated_sequences.aln  2> partitions.txt
 
 #Run the phylogeny
 #!/bin/bash
@@ -280,7 +314,7 @@ perl /beegfs/home/bguinet/these_scripts_2/catfasta2phyml.pl -f --concatenate --v
 #SBATCH --cpus-per-task=10
 #SBATCH -e /beegfs/data/bguinet/LbFV_family_project/Clustering/dsDNA_phylogeny_log.error
 #SBATCH -o /beegfs/data/bguinet/LbFV_family_project/ClusteringdsDNA_phylogeny/_log.out
-/beegfs/data/bguinet/Bguinet_conda/bin/iqtree -s /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/Concatenated_sequences.aln -spp /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/partitions.tab -m TEST -alrt 1000  -bb 1000  -nt 10
+/beegfs/data/bguinet/Bguinet_conda/bin/iqtree -s /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/Concatenated_sequences.aln -spp /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/partitions.tab -m MFP -alrt 1000  -bb 1000  -nt 10
 ```
 
 /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment/*_AA.dna 
