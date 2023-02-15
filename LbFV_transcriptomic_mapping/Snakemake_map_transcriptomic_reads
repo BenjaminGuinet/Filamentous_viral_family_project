@@ -1,0 +1,83 @@
+
+
+
+#Usage example on cluster 
+
+#nohup snakemake -j 8000  -s Snakemake_map_transcriptomic_reads  --use-conda  --cluster "sbatch -J {params.name} -p normal -N 1 --cpus-per-task  {params.threads}  --exclude='pbil-deb33' -o {params.out} -e {params.err}  " &> nohup_map_transcriptomic_reads_snakemake.out &
+
+
+
+import re 
+import os 
+import pandas as pd 
+
+list_reads= list(pd.read_csv("/beegfs/data/bguinet/LbFV_family_project/LbFV_transcriptomic/SRAsamples.txt")['SRA_IDs'])
+
+dir="/beegfs/data/bguinet/LbFV_family_project/LbFV_transcriptomic/" 
+
+
+rule all:
+  input:
+        expand(dir+"{read}_2.fastq.gz_created", read = list_reads),
+        dir+"LbFV_free_transcriptomic.bam"   
+
+#Run clustalo analysis 
+rule Download_reads:
+  params:
+     threads="4",
+     time="40:00",
+     name="dir_{read}",
+     out=dir+"/SRA_run_{read}.out",
+     err=dir+"/SRA_run_{read}.error"
+  output: 
+     Control_file=dir+"{read}_2.fastq.gz_created"
+  shell:
+     """
+     hostname
+     cd {dir}
+     export PATH=$PATH:/beegfs/data/bguinet/Bguinet_conda/bin/
+     /beegfs/data/bguinet/TOOLS/sratoolkit.2.11.0-ubuntu64/bin/fasterq-dump {wildcards.read} -e {params.threads} -O .
+     /beegfs/data/bguinet/Bguinet_conda/bin/pigz -p {params.threads} {wildcards.read}_1.fastq     
+     /beegfs/data/bguinet/Bguinet_conda/bin/pigz -p {params.threads} {wildcards.read}_2.fastq
+     FILE={wildcards.read}_2.fastq.gz
+     if test -f "$FILE"; then
+        touch {output.Control_file}
+     fi
+     """
+
+rule Map_reads:
+  params:
+     threads="35",
+     time="24:00:00",
+     name="Mapping_transcripto_LbFV",
+     out=dir+"/Mapping_transcripto_LbFV.out",
+     err=dir+"/Mapping_transcripto_LbFV.error"
+  input:
+     LbFV_assembly="/beegfs/data/bguinet/LbFV_family_project/Genomes/LbFV/LbFV_free.fna",
+     LbFV_gff="/beegfs/data/bguinet/LbFV_family_project/Genomes/LbFV/Predicted_orfs/Final_ORF_prediction_LbFV.gff"
+  output:
+     BAM_file=dir+"LbFV_free_transcriptomic.bam",
+  shell:
+     """
+     hostname
+     cd {dir}
+     export PATH=$PATH:/beegfs/data/bguinet/Bguinet_conda/bin/
+     /beegfs/data/bguinet/Bguinet_conda/bin/hisat2-build -p {params.threads} {input.LbFV_assembly} /beegfs/data/bguinet/LbFV_family_project/Genomes/LbFV/LbFV_free_index
+     /beegfs/data/bguinet/Bguinet_conda/bin/hisat2  -1 SRR6456293_1.fastq.gz,SRR6456294_1.fastq.gz,SRR6456295_1.fastq.gz,SRR6456296_1.fastq.gz,SRR6456297_1.fastq.gz,SRR6456298_1.fastq.gz,SRR6456299_1.fastq.gz,SRR6456300_1.fastq.gz,SRR6456301_1.fastq.gz,SRR6456302_1.fastq.gz,SRR6456303_1.fastq.gz,SRR6456304_1.fastq.gz,SRR6456305_1.fastq.gz,SRR6456306_1.fastq.gz,SRR6456307_1.fastq.gz,SRR6456308_1.fastq.gz,SRR6456309_1.fastq.gz,SRR6456310_1.fastq.gz,SRR6456311_1.fastq.gz,SRR6456312_1.fastq.gz,SRR6456313_1.fastq.gz,SRR6456314_1.fastq.gz,SRR6456315_1.fastq.gz,SRR6456316_1.fastq.gz,SRR6456317_1.fastq.gz,SRR6456318_1.fastq.gz,SRR6456319_1.fastq.gz,SRR6456320_1.fastq.gz,SRR6456321_1.fastq.gz,SRR6456322_1.fastq.gz,SRR6456323_1.fastq.gz,SRR6456324_1.fastq.gz -2 SRR6456293_2.fastq.gz,SRR6456294_1.fastq.gz,SRR6456295_1.fastq.gz,SRR6456296_1.fastq.gz,SRR6456297_1.fastq.gz,SRR6456298_1.fastq.gz,SRR6456299_1.fastq.gz,SRR6456300_1.fastq.gz,SRR6456301_1.fastq.gz,SRR6456302_1.fastq.gz,SRR6456303_1.fastq.gz,SRR6456304_1.fastq.gz,SRR6456305_1.fastq.gz,SRR6456306_1.fastq.gz,SRR6456307_1.fastq.gz,SRR6456308_1.fastq.gz,SRR6456309_1.fastq.gz,SRR6456310_1.fastq.gz,SRR6456311_1.fastq.gz,SRR6456312_1.fastq.gz,SRR6456313_1.fastq.gz,SRR6456314_1.fastq.gz,SRR6456315_1.fastq.gz,SRR6456316_1.fastq.gz,SRR6456317_1.fastq.gz,SRR6456318_1.fastq.gz,SRR6456319_1.fastq.gz,SRR6456320_1.fastq.gz,SRR6456321_1.fastq.gz,SRR6456322_1.fastq.gz,SRR6456323_1.fastq.gz,SRR6456324_1.fastq.gz --dta -k 1 -p {params.threads} -q -x /beegfs/data/bguinet/LbFV_family_project/Genomes/LbFV/LbFV_free_index | /beegfs/data/soft/samtools-1.9/bin/samtools view -o {output.BAM_file}
+     /beegfs/data/soft/samtools-1.9/bin/samtools sort  {output.BAM_file} -o LbFV_free_transcriptomic_sorted.bam
+     # TPM calculation
+     #First create the GFF file
+     cd {dir}
+     #Second run the TPMcalculator algori
+     """
+     
+#/beegfs/data/bguinet/Bguinet_conda/bin/TPMCalculator -g {input.LbFV_gff} -b {output.BAM_file} -e -a
+
+###
+
+#cat /beegfs/data/bguinet/LbFV_family_project/Genomes/CcFV1/Mapping/454_reads/*2.fastq.gz >> /beegfs/data/bguinet/LbFV_family_project/Genomes/CcFV1/Mapping/454_reads/All_paired_R2.fastq.gz
+#cat /beegfs/data/bguinet/LbFV_family_project/Genomes/CcFV1/Mapping/454_reads/*1.fastq.gz >> /beegfs/data/bguinet/LbFV_family_project/Genomes/CcFV1/Mapping/454_reads/All_paired_R1.fastq.gz
+
+#/beegfs/data/bguinet/TOOLS/hisat2-2.1.0/hisat2-build -f /beegfs/data/bguinet/LbFV_family_project/Genomes/CcFV1/CcFV1_free.fna /beegfs/data/bguinet/LbFV_family_project/Genomes/CcFV1/Mapping/454_reads/CcFV1_free_index
+#/beegfs/data/bguinet/TOOLS/hisat2-2.1.0/hisat2 -p 8 CcFV1_free_index -1 All_paired_R1.fastq.gz -2 All_paired_R2.fastq.gz | /beegfs/data/bguinet/TOOLS/samtools-1.15/samtools sort -o  mapped.CcFV1_against_ERR3829591.bam 
+
