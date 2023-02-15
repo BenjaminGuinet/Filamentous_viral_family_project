@@ -1,0 +1,150 @@
+#Example usage 
+
+#nohup snakemake -j 8000  -s Snakemake_nanopore_assembly  --cluster "sbatch -J {params.name} -p normal -N 1 --cpus-per-task  {params.threads}  -o {params.out} -e {params.err}  " &> nohup_nanopore_assembly.out &
+
+#Genomes path 
+Output_path ="/beegfs/data/bguinet/LbFV_family_project/Nanopore_data/"
+Flye_output_path="/beegfs/data/bguinet/LbFV_family_project/Nanopore_data/Flye_output/"
+
+#Programs
+Porechop="/beegfs/data/bguinet/TOOLS/Porechop/porechop-runner.py"
+Nanoplot="/beegfs/data/chaberkorn/Tools/myconda/bin/NanoPlot"
+Nanofilt="/beegfs/data/bguinet/Bguinet_conda/bin/NanoFilt"
+Flye="/beegfs/data/bguinet/TOOLS/Flye/bin/flye"
+SAMTOOLS=/beegfs/data/soft/samtools-1.9/bin
+
+#This rule contains all the expected output from all your rules within the snakefile 
+rule all:
+  input:
+      Output_path+"Eformosa_trim_porechop_reads.fastq.gz",
+      Output_path+"Eformosa_trim_porechop_reads.fastq.gz",
+      Output_path+"Eformosa_trim_porechop_nanofilt_reads.fastq.gz",
+      Flye_output_path+"assembly.fasta"
+
+rule Trimming_analysis:
+    params:
+      threads="16",
+      time="3:00:00",
+      name="Porechop_run_Eformosa",
+      out=Output_path+"/Porechop_run_Eformosa.out",
+      err=Output_path+"/Porchop_run_Eformosa.error"
+    input:
+      Fastq_pass_file="/beegfs/data/bguinet/LbFV_family_project/Nanopore_data/all_guppy.fastq.gz"
+    output:
+      Fastq_trimmed_Porechope_file=Output_path+"Eformosa_trim_porechop_reads.fastq.gz",
+    shell:
+      """
+      {Porechop} -i {input.Fastq_pass_file} -o {output.Fastq_trimmed_Porechope_file}
+      {NanoPlot} --fastq {output.Fastq_trimmed_Porechope_file} --loglength -o {Output_pah}summary-plots-log-transformed-after-porechop -t {params.threads}
+      """
+
+rule Trimming_poor_quality_reads:
+    params:
+      threads="1",
+      time="3:00:00",
+      name="Nanofilt_run_Eformosa",
+      out=Output_pah+"/Nanofilt_run_Eformosa.out",
+      err=Output_pah+"/Nanofilt_run_Eformosa.error"
+    input:
+      Fastq_trimmed_Porechope_file=Output_pah+"Eformosa_trim_porechop_reads.fastq.gz"
+    output:
+      Fastq_trimmed_Porechope_Nanofilt_file=Output_pah+"Eformosa_trim_porechop_nanofilt_reads.fastq.gz"
+    shell:
+      """
+      gunzip -c {input.Fastq_trimemd_Porechope_file} | {Nanofilt} -q 12 -l 1000 | gzip >  {output.Fastq_trimmed_Porechope_Nanofilt_file}
+      """
+
+#Running flye assembly 
+rule Flye_assembly:
+   params:
+      threads="32",
+      time="36:00:00",
+      mem="70G",
+      partition="bigmem",
+      name="Flye_run_Eformosa",
+      out=Output_pah+"/Flye_run_Eformosa.out",
+      err=Output_pah+"/Flye_run_Eformosa.error"
+   input:
+      Fastq_trimmed_Porechope_Nanofilt_file=Output_pah+"Eformosa_trim_porechop_nanofilt_reads.fastq.gz"
+   output:
+      Flye_output={Flye_output_path}assembly.fasta
+   shell:
+      """
+      {Flye}  --nano-raw {input.Fastq_trimmed_Porechope_Nanofilt_file} --meta --out-dir {Flye_output_path} -t {params.threads}  --scaffold
+      """
+
+
+#Mapp illuina read on nanopore assembly with BWA 
+rule BWA mapping:
+   params:
+      threads="32",
+      time="36:00:00",
+      mem="70G",
+      partition="bigmem",
+      name="Flye_run_Eformosa",
+      out=Output_pah+"/Flye_run_Eformosa.out",
+      err=Output_pah+"/Flye_run_Eformosa.error"
+   input:
+      Flye_assembly={Flye_output_path}assembly.fasta
+   output:
+      Flye_output={Flye_output_path}assembly.fasta
+   shell:
+      """
+      cd {Flye_output_path}
+      #index the genome file and do alignment
+      {bwa-mem2} index Flye_assembly_indexed {input.Flye_assembly} 
+      pigz -d 2b-bis_CTTGTA_R1.fastq.gz -p {input.threads}
+      pigz -d 2b-bis_CTTGTA_R2.fastq.gz -p {input.threads}
+      python3 script.py 2b-bis_CTTGTA_R1.fastq 2b-bis_CTTGTA_R2.fastq > 2b-bis_CTTGTA_ALL.fastq
+      {bwa-mem2} mem -t {params.threads} assembly.fasta 2b-bis_CTTGTA_ALL.fastq  > 2b-bis_CTTGTA_ALL.sam
+      {racon} -t {params.threads}  2b-bis_CTTGTA_ALL.fastq  2b-bis_CTTGTA_ALL.sam {input.Flye_assembly} > racon.fasta
+
+      #index bam and genome files
+      #{SAMTOOLS} index Eformosa_illumina_L003.sort.bam  -@{params.threads}
+      #{SAMTOOLS} index Eformosa_illumina_L003.sort.bam  -@{params.threads}
+      {SAMTOOLS} faidx {input.Flye_assembly} 
+      {SAMTOOLS} merge merged_Eformosa_illumina.sort.bam Eformosa_illumina_L003.sort.bam Eformosa_illumina_L001.sort.bam -@{params.threads}
+      {SAMTOOLS} index merged_Eformosa_illumina.sort.bam -@{params.threads}
+      """
+
+rule Polish:
+rule NextPolishing:
+   params:
+      threads="32",
+      time="36:00:00",
+      mem="70G",
+      partition="bigmem",
+      name="Flye_run_Eformosa",
+      out=Output_pah+"/Flye_run_Eformosa.out",
+      err=Output_pah+"/Flye_run_Eformosa.error"
+   input:
+      Flye_assembly={Flye_output_path}assembly.fasta,
+      BAM_1={Flye_output_path}Eformosa_illumina_L003.sort.bam,
+      BAM_2={Flye_output_path}Eformosa_illumina_L003.sort.bam
+   output:
+      Flye_output={Flye_output_path}assembly.fasta
+   shell:
+      """
+      cd {Flye_output_path}
+      zcat /beegfs/data/varaldi/GENOMICS_WASPS/data/2b-bis_CTTGTA_L003_R1.fastq.gz /beegfs/data/varaldi/GENOMICS_WASPS/data/2b-bis_CTTGTA_L001_R1.fastq.gz  | pigz -p 90  > 2b-bis_CTTGTA_R1.fastq.gz
+      zcat /beegfs/data/varaldi/GENOMICS_WASPS/data/2b-bis_CTTGTA_L003_R2.fastq.gz /beegfs/data/varaldi/GENOMICS_WASPS/data/2b-bis_CTTGTA_L001_R2.fastq.gz  | pigz -p 90  > 2b-bis_CTTGTA_R2.fastq.gz
+      pigz -d 2b-bis_CTTGTA_R1.fastq.gz -p {input.threads}
+      pigz -d 2b-bis_CTTGTA_R2.fastq.gz -p {input.threads}
+      python3 script.py 2b-bis_CTTGTA_R1.fastq 2b-bis_CTTGTA_R2.fastq > 2b-bis_CTTGTA_ALL.fastq
+      {bwa-mem2} mem -t 23 -a {input.Flye_assembly} /beegfs/data/varaldi/GENOMICS_WASPS/data/2b-bis_CTTGTA_L003_R1.fastq.gz  > alignments_2b-bis_CTTGTA_L003_R1.sam
+      {bwa-mem2} mem -t 23 -a {input.Flye_assembly} /beegfs/data/varaldi/GENOMICS_WASPS/data/2b-bis_CTTGTA_L003_R2.fastq.gz  > alignments_2b-bis_CTTGTA_L003_R2.sam
+      {bwa-mem2} mem -t 23 -a {input.Flye_assembly} /beegfs/data/varaldi/GENOMICS_WASPS/data/2b-bis_CTTGTA_L001_R1.fastq.gz  > alignments_2b-bis_CTTGTA_L001_R1.sam
+      {bwa-mem2} mem -t 23 -a {input.Flye_assembly} /beegfs/data/varaldi/GENOMICS_WASPS/data/2b-bis_CTTGTA_L001_R2.fastq.gz  > alignments_2b-bis_CTTGTA_L001_R2.sam
+      {SAMTOOLS} merge alignments_2b-bis_CTTGTA_R1_merged.sam  alignments_2b-bis_CTTGTA_L003_R1.sam alignments_2b-bis_CTTGTA_L001_R1.sam -@{params.threads}
+      {SAMTOOLS} merge alignments_2b-bis_CTTGTA_R2_merged.sam  alignments_2b-bis_CTTGTA_L003_R2.sam alignments_2b-bis_CTTGTA_L001_R2.sam -@{params.threads}
+      Polypolish/scripts/polypolish_insert_filter.py --in1 alignments_2b-bis_CTTGTA_R1_merged.sam --in2 alignments_2b-bis_CTTGTA_R2_merged.sam --out1 filtered_alignments_2b-bis_CTTGTA_R1_merged.sam --out2 filtered_alignments_2b-bis_CTTGTA_R1_merged.sam 
+      polypolish draft.fasta filtered_1.sam filtered_2.sam > polished.fasta
+
+      python3 ../NextPolish/lib/nextpolish1.py -g assembly.fasta -t 1 -p 90 -s merged_Eformosa_illumina.sort.bam > genome.polishtemp.fa
+      {bwa-mem2} index genome.polishtemp.fa 
+      {bwa-mem2} mem -t {params.threads} genome.polishtemp.fa /beegfs/data/varaldi/GENOMICS_WASPS/data/2b-bis_CTTGTA_L003_R1.fastq.gz  /beegfs/data/varaldi/GENOMICS_WASPS/data/2b-bis_CTTGTA_L003_R2.fastq.gz  | samtools view --threads {params.threads} -F 0x4 -b -|samtools fixmate -m --threads {params.threads}  - -|samtools sort  --threads {params.threads} -|samtools markdup --threads {params.threads} -r - Eformosa_illumina_L003_2.sort.bam
+      {bwa-mem2} mem -t {params.threads} genome.polishtemp.fa /beegfs/data/varaldi/GENOMICS_WASPS/data/2b-bis_CTTGTA_L001_R1.fastq.gz  /beegfs/data/varaldi/GENOMICS_WASPS/data/2b-bis_CTTGTA_L001_R2.fastq.gz  | samtools view --threads {params.threads} -F 0x4 -b -|samtools fixmate -m --threads {params.threads}  - -|samtools sort  --threads {params.threads} -|samtools markdup --threads {params.threads} -r - Eformosa_illumina_L001_2.sort.bam
+      {SAMTOOLS} merge merged_Eformosa_illumina_2.sort.bam Eformosa_illumina_L003_2.sort.bam Eformosa_illumina_L001_2.sort.bam -@{params.threads}
+      java -jar /beegfs/data/bguinet/TOOLS/pilon-1.24.jar --genome  {input.Flye_assembly}  --frags {input.BAM_1} {input.BAM_1} {input.BAM_3} {input.BAM_4}
+      """
+
