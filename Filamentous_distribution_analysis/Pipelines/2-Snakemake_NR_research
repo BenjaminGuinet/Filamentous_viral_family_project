@@ -1,0 +1,53 @@
+from Bio import SeqIO
+import pandas as pd
+import re
+import os
+
+#Example run in slurm
+
+#nohup snakemake -j 8000  -s Snakemake_NR_research  --cluster "sbatch -J {params.name} -p normal -N 1 --cpus-per-task  {params.threads}  --constraint='haswell|broadwell|skylake' -o {params.out} -e {params.err}  " &> nohup_NR_research_snakemake.out &
+
+Cluster_directory="/beegfs/data/bguinet/Filamentoviridae_vs_ALL_genomes/Clusters/"
+
+# Create directories 
+
+clusters=[]
+
+for file in os.listdir(Cluster_directory):
+  if file.endswith(".aa"):
+    clusters.append(re.sub(".aa","",file))
+    
+
+## Program used 
+mmseqs="/beegfs/data/bguinet/TOOLS/mmseqs/bin/mmseqs"
+
+
+#Snakemake part 
+
+rule all:
+        input:
+                expand(Cluster_directory+"All_clusters_NR_result.m8",cluster = clusters)
+
+# Run Filtering_NR_analysis
+rule NR_filtering_analysis:
+  params:
+     threads="10",
+     time="5:00:00",
+     name="NR_Cluster_alignment",
+     out=Cluster_directory+"/NR_run.out",
+     err=Cluster_directory+"/NR_run.error"
+  output:
+     Cluster_db=Cluster_directory+"All_clusters_db",
+     NR_result=Cluster_directory+"All_clusters_NR_result",
+     NR_tpm=Cluster_directory+"All_clusters_NR_tpm",
+     NR_results=Cluster_directory+"All_clusters_NR_result.m8",
+  shell:
+     """
+     hostname
+     cd {Cluster_directory}
+     cat *.aa >> {Cluster_directory}/All_clusters.aa
+     #Gather all sequence from cluster into one unique file
+     {mmseqs} createdb All_clusters.aa Cluster_db
+     {mmseqs} search Cluster_db /beegfs/data/bguinet/these/NR_db {output.NR_result} {output.NR_tpm} -e 0.001 --remove-tmp-files
+     {mmseqs} convertalis --format-output 'query,target,pident,alnlen,mismatch,gapopen,qstart,qend,tstart,tend,evalue,bits,tlen,qcov,tcov,taxid,taxname,taxlineage' Cluster_db /beegfs/data/bguinet/these/NR_db {output.NR_result} {output.NR_results}
+     """

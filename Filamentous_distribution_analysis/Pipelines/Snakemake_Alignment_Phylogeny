@@ -1,0 +1,95 @@
+#Usage example on cluster 
+
+#nohup snakemake -j 8000  -s Snakemake_Alignment_Phylogeny  --cluster "sbatch -J {params.name} -p normal -N 1 --cpus-per-task  {params.threads}  -o {params.out} -e {params.err}  " &> nohup_Alignment_Phylogeny_snakemake.out &
+
+
+import re 
+from Bio import SeqIO 
+import os 
+#Define your paths :
+
+Cluster_seqs_path="/beegfs/data/bguinet/Filamentoviridae_vs_ALL_genomes/Clusters2" #The path where all cluster seq not aligned will be present
+Cluster_alignment_path="/beegfs/data/bguinet/Filamentoviridae_vs_ALL_genomes/Clusters2" #The path where all aligned cluster seq will be present
+Cluster_phylogeny_path="/beegfs/data/bguinet/Filamentoviridae_vs_ALL_genomes/Clusters2"  #The path where all cluster phylognies seq will be present
+
+
+SAMPLES=[]
+for file in os.listdir(Cluster_seqs_path):
+	if file.endswith(".aa"):
+#		if "dnapol" in file:
+#			continue
+			SAMPLES.append(re.sub(".aa","",file))	
+
+#SAMPLES=['LbFVorf94']
+SAMPLES=['pif2','pif1','lef9','lcat','helicase','dnapol','PDDEXK','LbFVorf99','LbFVorf94','ATPase','Integrase2']
+rule all:
+  input:
+        #Cluster_phylogeny_path+"/concat.treefile"
+        expand(Cluster_alignment_path+"/{cluster_number}.ali", cluster_number = SAMPLES),
+        #expand(Cluster_alignment_path+"/{cluster_number}_AA.ali.trimmed", cluster_number = SAMPLES),
+        expand(Cluster_phylogeny_path+"/{cluster_number}.ali.treefile", cluster_number = SAMPLES)
+
+#Run clustalo analysis 
+rule Clustal_cluster_alignment:
+  log: Cluster_alignment_path+"/{cluster_number}.log"
+  params:
+     threads="5",
+     time="2:00:00",
+     name="Cluster_alignment_{cluster_number}",
+     out=Cluster_alignment_path+"/Clustal_run_{cluster_number}.out",
+     err=Cluster_alignment_path+"/Clustal_run_{cluster_number}.error"
+  input:
+     Cluster_file=Cluster_seqs_path+"/{cluster_number}.aa"
+  output: 
+     Alignment_cluster_file=Cluster_alignment_path+"/{cluster_number}.ali",
+  shell:
+     """
+     hostname
+     cd {Cluster_seqs_path}
+     /beegfs/data/bguinet/TOOLS/clustalo -i {input.Cluster_file} -o {output.Alignment_cluster_file} --threads {params.threads}
+     #/beegfs/data/bguinet/TOOLS/mafft-7.505-with-extensions/bin/mafft-ginsi  --maxiterate 1000 --thread {params.threads} {input.Cluster_file} > {output.Alignment_cluster_file}
+     """
+
+#python3 /beegfs/data/bguinet/LbFV_family_project/Clustering/Remove_dup_clusters.py -c {wildcards.cluster_number}
+
+
+#Run trimal analysis 
+#rule Trimal_cluster:
+#  log: Cluster_alignment_path+"/{cluster_number}.log"
+#  params:
+#     threads="1",
+#     time="10:00",
+#     name="Cluster_alignment_{cluster_number}",
+#     out=Cluster_alignment_path+"/Trimal_run_{cluster_number}.out",
+#     err=Cluster_alignment_path+"/Trimal_run_{cluster_number}.error"
+#  input:
+#     Alignment_cluster_file=Cluster_alignment_path+"/{cluster_number}.ali"
+#  output:
+#     Alignment_cluster_file_trimmed=Cluster_alignment_path+"/{cluster_number}.ali.trimmed"
+#  shell:
+#     """
+#     hostname
+#     cd {Cluster_seqs_path}
+#     /beegfs/data/bguinet/TOOLS/trimal/source/trimal -in {input.Alignment_cluster_file} -out {output.Alignment_cluster_file_trimmed} -automated1 -fasta
+##     #/beegfs/data/bguinet/Bguinet_conda/bin/clipkit Cluster48_AA.ali2 -m gappy {input.Alignment_cluster_file} -out {output.Alignment_cluster_file_trimmed}
+#     """
+
+
+#Run Phylogeny analysis 
+rule Phylogeny_cluster_alignment:
+  log: Cluster_phylogeny_path+"/{cluster_number}.log"
+  params:
+     threads="5",
+     time="2:00:00",
+     name="Cluster_phylogeny_{cluster_number}",
+     out=Cluster_phylogeny_path+"/Iqtree_run_{cluster_number}.out",
+     err=Cluster_phylogeny_path+"/Iqtree_run_{cluster_number}.error"
+  input:
+     Alignment_cluster_file=Cluster_alignment_path+"/{cluster_number}.ali"
+  output:
+     Phylogeny_cluster_file=Cluster_phylogeny_path+"/{cluster_number}.ali.treefile"
+  shell:
+     """ 
+     /beegfs/data/bguinet/TOOLS/iqtree-2.1.2-Linux/bin/iqtree2 -s {input.Alignment_cluster_file} -m MFP -alrt 5000 -bb 5000  -nt {params.threads}
+     sed -i 's@____@_+__@g' {output.Phylogeny_cluster_file}
+     """

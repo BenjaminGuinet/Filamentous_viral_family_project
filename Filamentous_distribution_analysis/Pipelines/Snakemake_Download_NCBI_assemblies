@@ -1,0 +1,109 @@
+#Usage example on cluster 
+
+#nohup snakemake -j 10000  -s Snakemake_Download_assemblies  --cluster "sbatch -J {params.name} -p normal -N 1 --cpus-per-task  {params.threads}  --mem {params.mem} -o {params.out} -e {params.err}  " &> nohup_Download_assemblies_snakemake.out &
+
+import re 
+from Bio import SeqIO 
+import os 
+import pandas as pd
+import subprocess
+#Define your paths :
+Genomes_path="/beegfs/data/bguinet/Filamentoviridae_vs_ALL_genomes/Genomes/"
+
+
+#Define the softs 
+mmseqs="/beegfs/data/bguinet/TOOLS/mmseqs/bin/mmseqs"
+esearch="/beegfs/data/bguinet/Bguinet_conda/bin/esearch"
+esummary="/beegfs/data/bguinet/Bguinet_conda/bin/esummary"
+xtract="/beegfs/data/bguinet/Bguinet_conda/bin/xtract"
+rename="/beegfs/data/bguinet/Bguinet_conda/bin/rename"
+
+#Create the core filamentoviridae db 
+with open (Genomes_path+"All_filamentoviridae_core_genes.aa","w") as output:
+  for filename in os.listdir("/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_seqs_core/"):
+    if filename.endswith(".aa"):
+      core_name=re.sub(".*_","",filename)
+      core_name=re.sub(".aa","",core_name)
+      for record in SeqIO.parse("/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_seqs_core/"+filename, "fasta"):
+        print('>',record.id,"_",core_name,sep="",file=output)
+        print(record.seq,file=output)
+      for record in SeqIO.parse("/beegfs/data/bguinet/Filamentoviridae_vs_ALL_genomes/Genomes/Eucaryotic_sequence.aa","fasta"):
+        print('>',record.id,sep="",file=output)
+        print(record.seq,file=output)
+
+
+if os.path.exists("/beegfs/data/bguinet/Filamentoviridae_vs_ALL_genomes/Genomes/All_filamentoviridae_core_genes_db") ==False:
+  subprocess.run("/beegfs/data/bguinet/TOOLS/mmseqs/bin/mmseqs createdb /beegfs/data/bguinet/Filamentoviridae_vs_ALL_genomes/Genomes/All_filamentoviridae_core_genes.aa /beegfs/data/bguinet/Filamentoviridae_vs_ALL_genomes/Genomes/All_filamentoviridae_core_genes_db", shell=True)
+
+#Open the table with all IDs 
+Accession_table=pd.read_csv(Genomes_path+"ALL_accession_numbers.txt",header=None)
+ACCESSIONS=Accession_table[0].unique()
+
+#ACCESSIONS=['GCA_003951495.1']
+#
+ACCESSIONS2=[]
+for accession_number in ACCESSIONS:
+ if os.path.exists(Genomes_path+accession_number+".check") ==False:
+  if os.path.exists(Genomes_path+accession_number+".check") == False:
+   ACCESSIONS2.append(accession_number)
+
+#print(ACCESSIONS2)
+
+#ACCESSIONS=['GCA_003951495.1']
+
+rule all:
+  input:
+        expand(Genomes_path+"{accession_number}.check", accession_number = ACCESSIONS2),
+        expand(Genomes_path+"{accession_number}_result.m8",accession_number = ACCESSIONS2)
+
+#Run Download assemblies 
+rule Download_assemblies:
+  params:
+     threads="5",
+     time="30:00",
+     name="Assembly_{accession_number}",
+     out=Genomes_path+"{accession_number}.out",
+     err=Genomes_path+"{accession_number}.error"
+  input:
+     Core_genes=Genomes_path+"All_filamentoviridae_core_genes_db"
+  output: 
+     Check_file=Genomes_path+"{accession_number}.check",
+     Result_file=Genomes_path+"{accession_number}_result.m8"
+  shell:
+     """
+     hostname
+     cd {Genomes_path}
+     find . -name "{wildcards.accession_number}*.fna*" -type f -delete
+     export NCBI_API_KEY="ce154668962f6a9d4763cab6df03b7add608"
+     {esearch} -db assembly -query {wildcards.accession_number} </dev/null\
+         | {esummary} \
+         | {xtract} -pattern DocumentSummary -element FtpPath_GenBank \
+         | while read -r url ; do
+             fname=$(echo $url | grep -o 'GCA_.*' | sed 's/$/_genomic.fna.gz/') ;
+             wget "$url/$fname" ; done 
+     Nb_file=$(ls -ltrh {wildcards.accession_number}*.fna.gz | wc -l)
+     if (($Nb_file>1)); then
+      find . -name "{wildcards.accession_number}*.fna*" -type f -delete
+     else
+      echo "no"
+     fi
+    touch {output.Check_file}
+    touch {output.Check_file}  
+    #Rename file 
+    {rename} 's@{wildcards.accession_number}.*@{wildcards.accession_number}.fna.gz@gs' *{wildcards.accession_number}*.fna.gz
+    gzip -d {wildcards.accession_number}.fna.gz 
+    {mmseqs} createdb {wildcards.accession_number}.fna {wildcards.accession_number}_db
+    {mmseqs} search {input.Core_genes} {wildcards.accession_number}_db {wildcards.accession_number}_results {wildcards.accession_number}_tpm --threads {params.threads} -e 0.0001
+    {mmseqs} convertalis --format-output 'query,target,pident,alnlen,mismatch,gapopen,qstart,qend,tstart,tend,evalue,bits,tlen,qlen,qcov,tcov' {input.Core_genes} {wildcards.accession_number}_db {wildcards.accession_number}_results {wildcards.accession_number}_result.m8
+    rm -r {wildcards.accession_number}_tpm
+    rm {wildcards.accession_number}_results.0
+    rm {wildcards.accession_number}_results.1
+    rm {wildcards.accession_number}_results.2
+    rm {wildcards.accession_number}_results.3
+    rm {wildcards.accession_number}_results.4
+    rm {wildcards.accession_number}_results.index
+    rm {wildcards.accession_number}_results.dbtype
+    find . -name "{wildcards.accession_number}_db*" -type f -delete
+    """
+
+

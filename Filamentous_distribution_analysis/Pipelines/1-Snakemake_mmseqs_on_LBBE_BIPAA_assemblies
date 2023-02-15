@@ -1,0 +1,75 @@
+#Usage example on cluster 
+
+#nohup snakemake -j 10000  -s Snakemake_mmseqs_LBBE_BIPAA2  --cluster "sbatch -J {params.name} -p normal -N 1 --cpus-per-task  {params.threads} --constraint='broadwell|haswell|skylake' -o {params.out} -e {params.err}  " &> nohup_Snakemake_mmseqs_LBBE_BIPAA2.out &
+
+import re
+from Bio import SeqIO
+import os
+import pandas as pd
+import subprocess
+#Define your paths :
+
+Genomes_path="/beegfs/data/bguinet/Filamentoviridae_vs_ALL_genomes/Genomes_BIPAA_LBBE/"
+
+
+#Define the softs 
+mmseqs="/beegfs/data/bguinet/TOOLS/mmseqs/bin/mmseqs"
+
+
+
+SAMPLES=[]
+for file in os.listdir(Genomes_path):
+        if file.endswith(".fna"):
+                        SAMPLES.append(re.sub(".fna","",file))
+#
+#SAMPLES=['Tryphoninae_A']
+rule all:
+  input:
+        expand(Genomes_path+"{accession_number}_result.m8",accession_number = SAMPLES),
+        expand(Genomes_path+"{accession_number}_result_filtred.m8",accession_number = SAMPLES)
+#
+
+rule mmseqs:
+  params:
+     threads="5",
+     time="30:00",
+     name="Assembly_{accession_number}",
+     out=Genomes_path+"{accession_number}.out",
+     err=Genomes_path+"{accession_number}.error"
+  input:
+     Core_genes="/beegfs/data/bguinet/Filamentoviridae_vs_ALL_genomes/Genomes_NCBI/All_filamentoviridae_core_genes_db"
+  output:
+     Result_file=Genomes_path+"{accession_number}_result.m8"
+  shell:
+     """
+     cd {Genomes_path}
+     find . -name "{wildcards.accession_number}_result*" -type f -delete
+     {mmseqs} createdb {wildcards.accession_number}.fna {wildcards.accession_number}_db
+     {mmseqs} search {input.Core_genes} {wildcards.accession_number}_db {wildcards.accession_number}_result {wildcards.accession_number}_tpm --threads {params.threads} -e 0.01
+     {mmseqs} convertalis --format-output 'query,target,pident,alnlen,mismatch,gapopen,qstart,qend,tstart,tend,evalue,bits,tlen,qlen,qcov,tcov' {input.Core_genes} {wildcards.accession_number}_db {wildcards.accession_number}_result {wildcards.accession_number}_result.m8 || True
+     #rm -r {wildcards.accession_number}_tpm
+     #rm {wildcards.accession_number}_results.0
+     #rm {wildcards.accession_number}_results.1
+     #rm {wildcards.accession_number}_results.2
+     #rm {wildcards.accession_number}_results.3
+     #rm {wildcards.accession_number}_results.4
+     #rm {wildcards.accession_number}_results.index
+     #rm {wildcards.accession_number}_results.dbtype
+     find . -name "{wildcards.accession_number}_db*" -type f -delete
+     """
+
+rule filter:
+  params:
+     threads="1",
+     time="10:00",
+     name="Assembly_{accession_number}_filter",
+     out=Genomes_path+"{accession_number}_filter.out",
+     err=Genomes_path+"{accession_number}_filter.error"
+  input:
+     Result_file=Genomes_path+"{accession_number}_result.m8"
+  output:
+     Result_file_filtred= Genomes_path+"{accession_number}_result_filtred.m8"
+  shell:
+    """
+    python3 /beegfs/data/bguinet/Filamentoviridae_vs_ALL_genomes/Filter_mmseqs.py -f {input.Result_file}  -o {output.Result_file_filtred}
+    """
