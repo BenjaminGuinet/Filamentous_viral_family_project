@@ -1,0 +1,37 @@
+#NEXUS
+[ID: 8844594978]
+[This file contains the trees that were found during the MCMC
+search, sorted by posterior probability. "p" indicates the
+posterior probability of the tree whereas "P" indicates the
+cumulative posterior probability.]
+
+begin trees;
+   translate
+    1 AcMNPV,
+    2 AmFV,
+    3 CcFV1,
+    4 CcFV2,
+    5 CpV,
+    6 CuniNPV,
+    7 DFV,
+    8 DhNV,
+    9 DmSGHV,
+   10 EfFV,
+   11 GbNV,
+   12 GpSGHV,
+   13 HzNV1,
+   14 LbFV,
+   15 LdMNPV,
+   16 LhFV,
+   17 MdSGHV,
+   18 NeseNPV,
+   19 OrNV,
+   20 PcFV,
+   21 PmNV,
+   22 PoFV,
+   23 ToNV,
+   24 WSSV,
+   25 tom;
+   tree tree_1 [p = 0.999, P = 0.999] = [&W 0.999334] (15,(5,(18,(6,(24,((((25,19),11),(23,(13,(21,8)))),(2,((12,(17,9)),(((22,20),(10,(14,(16,7)))),(4,3))))))))),1);
+   tree tree_2 [p = 0.001, P = 1.000] = [&W 0.000666] (15,(5,(18,(6,((((25,19),11),(23,(13,(21,8)))),(24,(2,((12,(17,9)),(((22,20),(10,(14,(16,7)))),(4,3))))))))),1);
+end;
