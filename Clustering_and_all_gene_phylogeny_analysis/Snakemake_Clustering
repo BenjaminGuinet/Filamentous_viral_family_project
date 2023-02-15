@@ -1,0 +1,129 @@
+from Bio import SeqIO 
+import pandas as pd 
+import re 
+
+
+#usage example 
+
+# nohup snakemake -j 8000  -s Snakemake_Clustering  --cluster "sbatch -J {params.name} -p normal -N 1 --cpus-per-task  {params.threads}  --exclude='pbil-deb33' -o {params.out} -e {params.err}  " &> nohup_Clustering_snakemake.out &
+List_viruses =["LhFV","EfFV","PoFV","PcFV","CcFV1","CcFV2"]
+List_known_viruses=["AcMNPV","LdMNPV","CpV","NeseNPV","CuniNPV","HzNV-1","HzNV-2","GbNV","OrNV","ToNV","DiNV","DmNV_kal","DmNV_tom","DmNV_esp","DmNV_mau","PmNV","HgNV","DhNV","GpSGHV","MdSGHV","LbFV","AmFV","WSSV","CoBV"]
+
+#Create for each Genomes, a "Predicted_orfs" directory where are stored the predicted ORFs
+
+#Genomes directory
+Genome_directory="/beegfs/data/bguinet/LbFV_family_project/Genomes/"
+
+#Output clustering directory
+Output_cluster_dir="/beegfs/data/bguinet/LbFV_family_project/Clustering/"
+
+Cluster_seqs_path="/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_seqs"
+
+## Program used 
+mmseqs="/beegfs/data/bguinet/TOOLS/mmseqs/bin/mmseqs"
+ 
+
+# Remove already present 
+
+
+#Snakemake part 
+
+rule all:
+	input:
+		expand(Genome_directory+"{virus}/Predicted_orfs/Final_ORF_prediction_{virus}.faa", virus = List_viruses),
+		expand(Output_cluster_dir+"Final_ORF_prediction_{virus}.faa", virus = List_viruses),
+		Output_cluster_dir+"All_vs_All_All_known_and_new_viral_ORFs_result.m8",
+		Output_cluster_dir+"ALL_Predicted_and_known_ORFs_cluster.tab",
+		Output_cluster_dir+"/NR_homology_All_clusters_AA_result.m8"
+
+#This part needs specific files that can be shared upon demande but everything can begin with the file :'All_known_and_new_viral_ORFs.faa' 
+rule Extract_viral_predicted_ORFs:
+  params:
+    threads="1",
+    time="00:10:00",
+    name="Extract_ORFs_viral_assembly_{virus}",
+    out= Genome_directory+"{virus}/Predicted_orfs/Extract_ORFs_viral_assembly.out",
+    err= Genome_directory+"{virus}/Predicted_orfs/Extract_ORFs_viral_assembly.error"
+  input: 
+    Genome_fasta= Genome_directory+"{virus}/{virus}_free.fna",
+    ORFs_file="/beegfs/data/bguinet/LbFV_family_project/Clustering/ALL_new_virus_ORFs_predicted.faa"
+  output :
+    AA_ORFs= Genome_directory+"{virus}/Predicted_orfs/Final_ORF_prediction_{virus}.faa",
+    AA_ORFs2= Output_cluster_dir+"Final_ORF_prediction_{virus}.faa"
+  shell:
+    """
+    python3 /beegfs/data/bguinet/LbFV_family_project/Extract_viral_genome_ORFs.py -g {input.Genome_fasta} -oAA {output.AA_ORFs} -sp {wildcards.virus} -ORFs {input.ORFs_file}
+    cp {output.AA_ORFs} {output.AA_ORFs2}
+    """
+
+rule Blast_and_Clustering:
+    params:
+      threads="20",
+      time="00:40:00",
+      name="Clustering_LbFV_family",
+      out= Output_cluster_dir+"Clustering_job.out",
+      err= Output_cluster_dir+"Clustering_job.error"
+    output :
+      ALL_new_ORFs_file = Output_cluster_dir+"ALL_new_virus_ORFs_predicted_bis.faa",
+      Blast_output = Output_cluster_dir+"All_vs_All_All_known_and_new_viral_ORFs_result.m8",
+      Clustering_filtred_output = Output_cluster_dir+"ALL_Predicted_and_known_ORFs_cluster.tab",
+      Binary_table = Output_cluster_dir+"ALL_Predicted_and_known_ORFs_binary.tab"
+    shell:
+      """
+      cd  {Output_cluster_dir}
+      cat Final_ORF_prediction_*.faa >> {output.ALL_new_ORFs_file}
+      cat All_known_viral_ORFs.faa {output.ALL_new_ORFs_file} >> All_known_and_new_viral_ORFs.faa
+      {mmseqs} createdb  All_known_and_new_viral_ORFs.faa  All_known_and_new_viral_ORFs_db
+      {mmseqs} search  All_known_and_new_viral_ORFs_db All_known_and_new_viral_ORFs_db  All_vs_All_All_known_and_new_viral_ORFs_result All_vs_All_All_known_and_new_viral_ORFs_tpm  -s 7.5 -e 0.001 --threads 20      
+      #Transform results 
+      {mmseqs} convertalis --format-output 'query,target,pident,alnlen,mismatch,gapopen,qstart,qend,tstart,tend,evalue,bits,tlen,qlen,qcov,tcov' All_known_and_new_viral_ORFs_db All_known_and_new_viral_ORFs_db  All_vs_All_All_known_and_new_viral_ORFs_result All_vs_All_All_known_and_new_viral_ORFs_result.m8
+      #Save results as clustering tabular file and binary tab according to LbFV ORFs matchs  and add cluster
+      python3 /beegfs/home/bguinet/these_scripts_2/Create_cluster_tab.py --blast {output.Blast_output}  --cluster {output.Clustering_filtred_output} --binary {output.Binary_table} 
+      """
+
+rule HMMER_and_Clustering:
+   params:
+      threads="20",
+      time="00:40:00",
+      name="Clustering_LbFV_family",
+      out= Output_cluster_dir+"Hmmer_Clustering_job.out",
+      err= Output_cluster_dir+"Hmmer_Clustering_job.error"
+    output :
+      Clustering_filtred_output = Output_cluster_dir+"ALL_Predicted_and_known_ORFs_cluster.tab",
+      All_known_and_new_viral = Output_cluster_dir+"All_known_and_new_viral_ORFs.faa"
+    shell:
+      /beegfs/data/bguinet/TOOLS/hmmer-3.3.2/src/hmmbuild Cluster31_PASS_AA.hmm Cluster31_PASS_AA.ali
+      /beegfs/data/bguinet/TOOLS/hmmer-3.3.2/src/hmmsearch --tblout test.tab --cpu 5       
+
+# Run Filtering_NR_analysis
+rule NR_filtering_analysis:
+  params:
+     partition="bigmem",
+     mem="100G",
+     threads="20",
+     time="24:00:00",
+     name="NR_Cluster_alignment",
+     out=Cluster_seqs_path+"/NR_run.out",
+     err=Cluster_seqs_path+"/NR_run.error"
+  input:
+     Cluster_tab="/beegfs/data/bguinet/LbFV_family_project/Clustering/ALL_Predicted_and_known_ORFs_cluster.tab"
+  output:
+     All_Cluster_file=Cluster_seqs_path+"/All_clusters_AA.aa",
+     NR_results=Output_cluster_dir+"/NR_homology_All_clusters_AA_result.m8"
+  shell:
+     """
+     hostname
+     cd {Output_cluster_dir}
+     #Gather all sequence from cluster into one unique file
+     {mmseqs} search All_known_and_new_viral_ORFs_db /beegfs/data/bguinet/these/NR_db NR_homology_All_clusters_AA_result NR_homology_All_clusters_AA_tpm -e 0.001 --remove-tmp-files
+     {mmseqs} convertalis --format-output 'query,target,pident,alnlen,mismatch,gapopen,qstart,qend,tstart,tend,evalue,bits,tlen,qcov,tcov,taxid,taxname,taxlineage' {Output_cluster_dir}All_known_and_new_viral_ORFs_db /beegfs/data/bguinet/these/NR_db NR_homology_All_clusters_AA_result {output.NR_results}
+     python3 /beegfs/data/bguinet/LbFV_family_project/Clustering/Tag_Euk_clusters.py -c {input.Cluster_tab} -NR {output.NR_results} --cluster_path {Cluster_seqs_path}
+     """
+#Clustering_filtred_output = Output_cluster_dir+"ALL_Predicted_and_known_ORFs_cluster.tab",
+#Binary_table = Output_cluster_dir+"ALL_Predicted_and_known_ORFs_binary.tab"
+#
+  #Save results as clustering tabular file and binary tab according to LbFV ORFs matchs  and add cluster
+      #python3 /beegfs/home/bguinet/these_scripts_2/Create_cluster_tab.py --blast All_versus_All_Predicted_and_known_ORFs.m8 --cluster {output.Clustering_filtred_output} --binary {output.Binary_table} 
+      #Create clusters files
+      #python3 /beegfs/home/bguinet/these_scripts_2/Create_cluster_files.py -c {Clustering_filtred_output} -AA /beegfs/data/bguinet/LbFV_family_project/Clustering/ALL_Predicted_and_known_ORFs.fa -o /beegfs/data/bguinet/LbFV_family_project/Cluster$
+

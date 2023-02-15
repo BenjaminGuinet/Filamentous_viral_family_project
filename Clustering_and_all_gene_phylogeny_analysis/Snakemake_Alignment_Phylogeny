@@ -1,0 +1,160 @@
+#Usage example on cluster 
+
+#nohup snakemake -j 8000  -s Snakemake_Alignment_Phylogeny  --cluster "sbatch -J {params.name} -p normal -N 1 --cpus-per-task  {params.threads}  --exclude='pbil-deb33' -o {params.out} -e {params.err}  " &> nohup_Alignment_Phylogeny_snakemake.out &
+
+
+import re 
+from Bio import SeqIO 
+import os 
+#Define your paths :
+
+Cluster_seqs_path="/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_seqs_hmmer" #The path where all cluster seq not aligned will be present
+Cluster_alignment_path="/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_hmmer" #The path where all aligned cluster seq will be present
+Cluster_phylogeny_path="/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_phylogeny_hmmer"  #The path where all cluster phylognies seq will be present
+
+#If more than 2 taxa : 
+def file_size(filePath):
+    with open(filePath, 'r') as myfile:
+	    data=myfile.read().replace('\n', ' ')
+	    nb=data.count(">")
+	    return nb
+
+#For alignment with more than 3 taxa
+SAMPLES=[]
+for file in os.listdir(Cluster_seqs_path):
+    taxa_list=[]
+    if file.endswith(".aa"):
+     #if "Uncertain" in file:
+     # continue
+     #else:
+      taxa_list=[]
+      for record in SeqIO.parse(Cluster_seqs_path+"/"+file, "fasta"):
+         taxa_list.append(re.sub(".*_","",record.id))
+      if len(list(dict.fromkeys(taxa_list)))>3:
+         Clustername=re.sub(".aa","",file)
+         SAMPLES.append(Clustername)	
+
+
+#For phylogeny with more than 2 taxas 
+SAMPLES2=[]
+for file in os.listdir(Cluster_seqs_path):
+    if file.endswith(".aa"):
+       if file_size(Cluster_seqs_path+"/"+file)>2:
+         Clustername=re.sub(".aa","",file)
+         SAMPLES2.append(Clustername)	
+
+
+
+rule all:
+  input:
+        #Cluster_phylogeny_path+"/concat.treefile"
+        expand(Cluster_alignment_path+"/{cluster_number}_AA.ali", cluster_number = SAMPLES),
+        expand(Cluster_alignment_path+"/{cluster_number}_AA.ali.trimmed", cluster_number = SAMPLES),
+	Cluster_phylogeny_path+"/concat.treefile"
+        #expand(Cluster_phylogeny_path+"/{cluster_number2}_AA_trimmed.ali.treefile", cluster_number2 = SAMPLES2)
+	#expand(Cluster_phylogeny_path+"/{cluster_number2}_AA.ali.trimmed.treefile", cluster_number2 = SAMPLES2),
+
+#Run clustalo analysis 
+rule Clustal_cluster_alignment:
+  log: Cluster_alignment_path+"/{cluster_number}.log"
+  params:
+     threads="3",
+     time="2:00:00",
+     name="Cluster_alignment_{cluster_number}",
+     out=Cluster_alignment_path+"/Clustal_run_{cluster_number}.out",
+     err=Cluster_alignment_path+"/Clustal_run_{cluster_number}.error"
+  input:
+     Cluster_file=Cluster_seqs_path+"/{cluster_number}.aa"
+  output: 
+     Alignment_cluster_file=Cluster_alignment_path+"/{cluster_number}_AA.ali",
+  shell:
+     """
+     hostname
+     cd {Cluster_seqs_path}
+     /beegfs/data/bguinet/TOOLS/clustalo -i {input.Cluster_file} -o {output.Alignment_cluster_file} --threads {params.threads}
+     #/beegfs/data/bguinet/TOOLS/mafft-7.505-with-extensions/bin/mafft-ginsi  --maxiterate 1000 --thread {params.threads} {input.Cluster_file} > {output.Alignment_cluster_file}
+     """
+
+#python3 /beegfs/data/bguinet/LbFV_family_project/Clustering/Remove_dup_clusters.py -c {wildcards.cluster_number}
+
+#Run trimal analysis 
+rule Trimal_cluster:
+  log: Cluster_alignment_path+"/{cluster_number}.log"
+  params:
+     threads="1",
+     time="10:00",
+     name="Cluster_alignment_{cluster_number}",
+     out=Cluster_alignment_path+"/Trimal_run_{cluster_number}.out",
+     err=Cluster_alignment_path+"/Trimal_run_{cluster_number}.error"
+  input:
+     Alignment_cluster_file=Cluster_alignment_path+"/{cluster_number}_AA.ali"
+  output:
+     Alignment_cluster_file_trimmed=Cluster_alignment_path+"/{cluster_number}_AA.ali.trimmed"
+  shell:
+     """
+     hostname
+     cd {Cluster_seqs_path}
+     /beegfs/data/bguinet/TOOLS/trimal/source/trimal -in {input.Alignment_cluster_file} -out {output.Alignment_cluster_file_trimmed} -automated1 -fasta
+     #/beegfs/data/bguinet/Bguinet_conda/bin/clipkit Cluster48_AA.ali2 -m gappy {input.Alignment_cluster_file} -out {output.Alignment_cluster_file_trimmed}
+     """
+
+#all dsDNA phylogeny 
+rule dsDNA_phylogeny:
+  params:
+     threads="20",
+     time="6:00:00",
+     name="dsDNA_phylogeny",
+     out=Cluster_phylogeny_path+"/dsDNA_phylogeny.out",
+     err=Cluster_phylogeny_path+"/dsDNA_phylogeny.error"
+  output:
+     dsDNA_partition=Cluster_phylogeny_path+"/partition_dsDNA.txt",
+     dsDNA_partition2=Cluster_phylogeny_path+"/partition_dsDNA.tab",
+     Concatenated_sequence_alignment=Cluster_phylogeny_path+"/Concatenated_sequences_dsDNA.aln",
+     Treefile_output=Cluster_phylogeny_path+"/concat.treefile"
+  shell:
+     """
+     hostname
+     cd {Cluster_phylogeny_path}
+     #Concatenate cluster trimmed alignment 
+     perl /beegfs/home/bguinet/these_scripts_2/catfasta2phyml.pl -f --concatenate --verbose {Cluster_alignment_path}/*_AA.ali.trimmed > {output.Concatenated_sequence_alignment}  2> {output.dsDNA_partition} || true
+     #Transform to partition.tab 
+     grep '_AA.ali.trimmed =' {output.dsDNA_partition} >> {output.dsDNA_partition2} || true
+     sed -i "s@Cluster@AA, Cluster@g" {output.dsDNA_partition2}
+     cat {output.dsDNA_partition2}
+     #Inferring species tree with ultraboostap  and alrt 
+     /beegfs/data/bguinet/TOOLS/iqtree-2.1.2-Linux/bin/iqtree2 -s {output.Concatenated_sequence_alignment} -spp {output.dsDNA_partition2} --prefix concat -m MFP -alrt 5000  -bb 5000 -bnni --symtest-remove-bad  -nt {params.threads}
+     #Inferring locus trees
+     #/beegfs/data/bguinet/TOOLS/iqtree-2.1.2-Linux/bin/iqtree2 -s {output.Concatenated_sequence_alignment} -S concat.best_model.nex --prefix loci  -nt 10 
+     #compute concordance factors
+     #/beegfs/data/bguinet/TOOLS/iqtree-2.1.2-Linux/bin/iqtree2 -t {output.Treefile_output} --gcf loci.treefile -s {output.Concatenated_sequence_alignment}  --scf 100 --prefix concord  -nt 10
+     """
+
+
+
+
+
+#Run Phylogeny analysis 
+rule Phylogeny_cluster_alignment:
+  log: Cluster_phylogeny_path+"/{cluster_number2}.log"
+  params:
+     threads="3",
+     time="2:00:00",
+     name="Cluster_phylogeny_{cluster_number2}",
+     out=Cluster_phylogeny_path+"/Iqtree_run_{cluster_number2}.out",
+     err=Cluster_phylogeny_path+"/Iqtree_run_{cluster_number2}.error"
+  input:
+     Alignment_cluster_file_trimmed=Cluster_alignment_path+"/{cluster_number2}_AA.ali.trimmed"
+  output:
+     Phylogeny_cluster_file=Cluster_phylogeny_path+"/{cluster_number2}_AA.ali.trimmed.treefile"
+  shell:
+     """ 
+     /beegfs/data/bguinet/TOOLS/iqtree-2.1.2-Linux/bin/iqtree2 -s {input.Alignment_cluster_file_trimmed} -m MFP -alrt 1000  -nt 3
+     mv {Cluster_alignment_path}/{wildcards.cluster_number2}_AA_trimmed.ali.model.gz {Cluster_phylogeny_path}
+     mv {Cluster_alignment_path}/{wildcards.cluster_number2}_AA_trimmed.ali.mldist {Cluster_phylogeny_path}
+     mv {Cluster_alignment_path}/{wildcards.cluster_number2}_AA_trimmed.ali.bionj {Cluster_phylogeny_path}
+     mv {Cluster_alignment_path}/{wildcards.cluster_number2}_AA_trimmed.ali.treefile {Cluster_phylogeny_path}
+     mv {Cluster_alignment_path}/{wildcards.cluster_number2}_AA_trimmed.ali.log {Cluster_phylogeny_path}
+     mv {Cluster_alignment_path}/{wildcards.cluster_number2}_AA_trimmed.ali.iqtree {Cluster_phylogeny_path}
+     mv {Cluster_alignment_path}/{wildcards.cluster_number2}_AA_trimmed.ali.ckp.gz {Cluster_phylogeny_path}
+     sed -i 's@____@_+__@g' {output.Phylogeny_cluster_file}
+     """
