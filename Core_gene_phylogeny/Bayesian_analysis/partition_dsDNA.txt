@@ -1,0 +1,310 @@
+
+Checking sequences in infiles...
+
+  File /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster139_LbFVorf99_AA.ali.trimmed:  ntax=7 nchar=178
+  File /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster166_lef9_AA.ali.trimmed:  ntax=23 nchar=250
+  File /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster177_ac38_AA.ali.trimmed:  ntax=12 nchar=105
+  File /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster252_LbFVorf102_AA.ali.trimmed:  ntax=10 nchar=222
+  File /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster27_pif3_AA.ali.trimmed:  ntax=25 nchar=92
+  File /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster293_110_pif5_AA.ali.trimmed:  ntax=25 nchar=197
+  File /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster306_327_Integrase2_AA.ali.trimmed:  ntax=24 nchar=119
+  File /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster30_lef8_AA.ali.trimmed:  ntax=23 nchar=444
+  File /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster31_pif1_AA.ali.trimmed:  ntax=25 nchar=96
+  File /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster395_LbFVorf5_AA.ali.trimmed:  ntax=11 nchar=563
+  File /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster433_LbFVorf20_AA.ali.trimmed:  ntax=10 nchar=338
+  File /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster44_dnapol_AA.ali.trimmed:  ntax=25 nchar=746
+  File /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster453_LbFVorf92_AA.ali.trimmed:  ntax=12 nchar=676
+  File /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster45_ac81_AA.ali.trimmed:  ntax=24 nchar=189
+  File /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster462_1_43_p33_AA.ali.trimmed:  ntax=25 nchar=160
+  File /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster48_p74_AA.ali.trimmed:  ntax=25 nchar=608
+  File /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster53_38K_AA.ali.trimmed:  ntax=21 nchar=52
+  File /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster5_ATPase_AA.ali.trimmed:  ntax=11 nchar=310
+  File /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster708_PDDEXK_AA.ali.trimmed:  ntax=9 nchar=237
+  File /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster71_helicase_AA.ali.trimmed:  ntax=17 nchar=307
+  File /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster743_lcat_AA.ali.trimmed:  ntax=11 nchar=258
+  File /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster89_pif2_AA.ali.trimmed:  ntax=24 nchar=147
+  File /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster8_lef4_AA.ali.trimmed:  ntax=23 nchar=167
+  File /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster997_LbFVorf87_AA.ali.trimmed:  ntax=8 nchar=135
+  File /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/ClusterNone_LbFVorf23_AA.ali.trimmed:  ntax=7 nchar=71
+  File /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/ClusterNone_p69_AA.ali.trimmed:  ntax=8 nchar=39
+
+  Need to fill missing sequences for file /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster708_PDDEXK_AA.ali.trimmed:
+    Adding all gaps for seqid CuniNPV
+    Adding all gaps for seqid NeseNPV
+    Adding all gaps for seqid LdMNPV
+    Adding all gaps for seqid MdSGHV
+    Adding all gaps for seqid HzNV-1
+    Adding all gaps for seqid AcMNPV
+    Adding all gaps for seqid WSSV
+    Adding all gaps for seqid GbNV
+    Adding all gaps for seqid AmFV
+    Adding all gaps for seqid ToNV
+    Adding all gaps for seqid OrNV
+    Adding all gaps for seqid DhNV
+    Adding all gaps for seqid PmNV
+    Adding all gaps for seqid tom
+    Adding all gaps for seqid CpV
+    Adding all gaps for seqid DFV
+
+  Need to fill missing sequences for file /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster45_ac81_AA.ali.trimmed:
+    Adding all gaps for seqid WSSV
+
+  Need to fill missing sequences for file /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster997_LbFVorf87_AA.ali.trimmed:
+    Adding all gaps for seqid CuniNPV
+    Adding all gaps for seqid NeseNPV
+    Adding all gaps for seqid LdMNPV
+    Adding all gaps for seqid MdSGHV
+    Adding all gaps for seqid DmSGHV
+    Adding all gaps for seqid HzNV-1
+    Adding all gaps for seqid AcMNPV
+    Adding all gaps for seqid GpSGHV
+    Adding all gaps for seqid WSSV
+    Adding all gaps for seqid GbNV
+    Adding all gaps for seqid AmFV
+    Adding all gaps for seqid ToNV
+    Adding all gaps for seqid OrNV
+    Adding all gaps for seqid DhNV
+    Adding all gaps for seqid PmNV
+    Adding all gaps for seqid tom
+    Adding all gaps for seqid CpV
+
+  Need to fill missing sequences for file /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster177_ac38_AA.ali.trimmed:
+    Adding all gaps for seqid CuniNPV
+    Adding all gaps for seqid NeseNPV
+    Adding all gaps for seqid MdSGHV
+    Adding all gaps for seqid DmSGHV
+    Adding all gaps for seqid HzNV-1
+    Adding all gaps for seqid WSSV
+    Adding all gaps for seqid GbNV
+    Adding all gaps for seqid AmFV
+    Adding all gaps for seqid ToNV
+    Adding all gaps for seqid OrNV
+    Adding all gaps for seqid DhNV
+    Adding all gaps for seqid PmNV
+    Adding all gaps for seqid tom
+
+  Need to fill missing sequences for file /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster252_LbFVorf102_AA.ali.trimmed:
+    Adding all gaps for seqid CuniNPV
+    Adding all gaps for seqid NeseNPV
+    Adding all gaps for seqid LdMNPV
+    Adding all gaps for seqid HzNV-1
+    Adding all gaps for seqid AcMNPV
+    Adding all gaps for seqid WSSV
+    Adding all gaps for seqid GbNV
+    Adding all gaps for seqid AmFV
+    Adding all gaps for seqid ToNV
+    Adding all gaps for seqid OrNV
+    Adding all gaps for seqid DhNV
+    Adding all gaps for seqid PmNV
+    Adding all gaps for seqid tom
+    Adding all gaps for seqid CpV
+    Adding all gaps for seqid DFV
+
+  Need to fill missing sequences for file /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster166_lef9_AA.ali.trimmed:
+    Adding all gaps for seqid WSSV
+    Adding all gaps for seqid AmFV
+
+  Need to fill missing sequences for file /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/ClusterNone_p69_AA.ali.trimmed:
+    Adding all gaps for seqid CuniNPV
+    Adding all gaps for seqid NeseNPV
+    Adding all gaps for seqid LdMNPV
+    Adding all gaps for seqid MdSGHV
+    Adding all gaps for seqid DmSGHV
+    Adding all gaps for seqid HzNV-1
+    Adding all gaps for seqid AcMNPV
+    Adding all gaps for seqid GpSGHV
+    Adding all gaps for seqid WSSV
+    Adding all gaps for seqid GbNV
+    Adding all gaps for seqid AmFV
+    Adding all gaps for seqid ToNV
+    Adding all gaps for seqid OrNV
+    Adding all gaps for seqid DhNV
+    Adding all gaps for seqid PmNV
+    Adding all gaps for seqid tom
+    Adding all gaps for seqid CpV
+
+  Need to fill missing sequences for file /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster453_LbFVorf92_AA.ali.trimmed:
+    Adding all gaps for seqid CuniNPV
+    Adding all gaps for seqid NeseNPV
+    Adding all gaps for seqid LdMNPV
+    Adding all gaps for seqid HzNV-1
+    Adding all gaps for seqid AcMNPV
+    Adding all gaps for seqid WSSV
+    Adding all gaps for seqid GbNV
+    Adding all gaps for seqid ToNV
+    Adding all gaps for seqid OrNV
+    Adding all gaps for seqid DhNV
+    Adding all gaps for seqid PmNV
+    Adding all gaps for seqid tom
+    Adding all gaps for seqid CpV
+
+  Need to fill missing sequences for file /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster71_helicase_AA.ali.trimmed:
+    Adding all gaps for seqid CuniNPV
+    Adding all gaps for seqid NeseNPV
+    Adding all gaps for seqid LdMNPV
+    Adding all gaps for seqid AcMNPV
+    Adding all gaps for seqid WSSV
+    Adding all gaps for seqid AmFV
+    Adding all gaps for seqid CpV
+    Adding all gaps for seqid DFV
+
+  Need to fill missing sequences for file /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster30_lef8_AA.ali.trimmed:
+    Adding all gaps for seqid WSSV
+    Adding all gaps for seqid AmFV
+
+  Need to fill missing sequences for file /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster743_lcat_AA.ali.trimmed:
+    Adding all gaps for seqid CuniNPV
+    Adding all gaps for seqid NeseNPV
+    Adding all gaps for seqid LdMNPV
+    Adding all gaps for seqid HzNV-1
+    Adding all gaps for seqid AcMNPV
+    Adding all gaps for seqid WSSV
+    Adding all gaps for seqid GbNV
+    Adding all gaps for seqid AmFV
+    Adding all gaps for seqid ToNV
+    Adding all gaps for seqid OrNV
+    Adding all gaps for seqid DhNV
+    Adding all gaps for seqid PmNV
+    Adding all gaps for seqid tom
+    Adding all gaps for seqid CpV
+
+  Need to fill missing sequences for file /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster433_LbFVorf20_AA.ali.trimmed:
+    Adding all gaps for seqid CuniNPV
+    Adding all gaps for seqid NeseNPV
+    Adding all gaps for seqid LdMNPV
+    Adding all gaps for seqid DmSGHV
+    Adding all gaps for seqid HzNV-1
+    Adding all gaps for seqid AcMNPV
+    Adding all gaps for seqid WSSV
+    Adding all gaps for seqid GbNV
+    Adding all gaps for seqid AmFV
+    Adding all gaps for seqid ToNV
+    Adding all gaps for seqid OrNV
+    Adding all gaps for seqid DhNV
+    Adding all gaps for seqid PmNV
+    Adding all gaps for seqid tom
+    Adding all gaps for seqid CpV
+
+  Need to fill missing sequences for file /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster5_ATPase_AA.ali.trimmed:
+    Adding all gaps for seqid CuniNPV
+    Adding all gaps for seqid NeseNPV
+    Adding all gaps for seqid LdMNPV
+    Adding all gaps for seqid HzNV-1
+    Adding all gaps for seqid AcMNPV
+    Adding all gaps for seqid WSSV
+    Adding all gaps for seqid GbNV
+    Adding all gaps for seqid ToNV
+    Adding all gaps for seqid OrNV
+    Adding all gaps for seqid DhNV
+    Adding all gaps for seqid PmNV
+    Adding all gaps for seqid tom
+    Adding all gaps for seqid CpV
+    Adding all gaps for seqid DFV
+
+  Need to fill missing sequences for file /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster89_pif2_AA.ali.trimmed:
+    Adding all gaps for seqid DFV
+
+  Need to fill missing sequences for file /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster306_327_Integrase2_AA.ali.trimmed:
+    Adding all gaps for seqid WSSV
+
+  Need to fill missing sequences for file /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster139_LbFVorf99_AA.ali.trimmed:
+    Adding all gaps for seqid CuniNPV
+    Adding all gaps for seqid NeseNPV
+    Adding all gaps for seqid LdMNPV
+    Adding all gaps for seqid MdSGHV
+    Adding all gaps for seqid DmSGHV
+    Adding all gaps for seqid HzNV-1
+    Adding all gaps for seqid AcMNPV
+    Adding all gaps for seqid GpSGHV
+    Adding all gaps for seqid WSSV
+    Adding all gaps for seqid GbNV
+    Adding all gaps for seqid AmFV
+    Adding all gaps for seqid ToNV
+    Adding all gaps for seqid OrNV
+    Adding all gaps for seqid DhNV
+    Adding all gaps for seqid PmNV
+    Adding all gaps for seqid tom
+    Adding all gaps for seqid CpV
+    Adding all gaps for seqid DFV
+
+  Need to fill missing sequences for file /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/ClusterNone_LbFVorf23_AA.ali.trimmed:
+    Adding all gaps for seqid CuniNPV
+    Adding all gaps for seqid NeseNPV
+    Adding all gaps for seqid LdMNPV
+    Adding all gaps for seqid MdSGHV
+    Adding all gaps for seqid DmSGHV
+    Adding all gaps for seqid HzNV-1
+    Adding all gaps for seqid AcMNPV
+    Adding all gaps for seqid GpSGHV
+    Adding all gaps for seqid WSSV
+    Adding all gaps for seqid GbNV
+    Adding all gaps for seqid AmFV
+    Adding all gaps for seqid ToNV
+    Adding all gaps for seqid OrNV
+    Adding all gaps for seqid DhNV
+    Adding all gaps for seqid PmNV
+    Adding all gaps for seqid tom
+    Adding all gaps for seqid CpV
+    Adding all gaps for seqid DFV
+
+  Need to fill missing sequences for file /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster53_38K_AA.ali.trimmed:
+    Adding all gaps for seqid MdSGHV
+    Adding all gaps for seqid GpSGHV
+    Adding all gaps for seqid WSSV
+    Adding all gaps for seqid AmFV
+
+  Need to fill missing sequences for file /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster8_lef4_AA.ali.trimmed:
+    Adding all gaps for seqid WSSV
+    Adding all gaps for seqid AmFV
+
+  Need to fill missing sequences for file /beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster395_LbFVorf5_AA.ali.trimmed:
+    Adding all gaps for seqid CuniNPV
+    Adding all gaps for seqid NeseNPV
+    Adding all gaps for seqid LdMNPV
+    Adding all gaps for seqid HzNV-1
+    Adding all gaps for seqid AcMNPV
+    Adding all gaps for seqid WSSV
+    Adding all gaps for seqid GbNV
+    Adding all gaps for seqid AmFV
+    Adding all gaps for seqid ToNV
+    Adding all gaps for seqid OrNV
+    Adding all gaps for seqid DhNV
+    Adding all gaps for seqid PmNV
+    Adding all gaps for seqid tom
+    Adding all gaps for seqid CpV
+
+Checked 26 files -- sequence labels and lengths seems OK.
+
+Printing concatenation to STDOUT, and partition information to STDERR.
+
+Concatenating sequences for 25 sequence labels, total length 6706.
+
+/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster139_LbFVorf99_AA.ali.trimmed = 1-178
+/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster166_lef9_AA.ali.trimmed = 179-428
+/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster177_ac38_AA.ali.trimmed = 429-533
+/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster252_LbFVorf102_AA.ali.trimmed = 534-755
+/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster27_pif3_AA.ali.trimmed = 756-847
+/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster293_110_pif5_AA.ali.trimmed = 848-1044
+/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster306_327_Integrase2_AA.ali.trimmed = 1045-1163
+/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster30_lef8_AA.ali.trimmed = 1164-1607
+/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster31_pif1_AA.ali.trimmed = 1608-1703
+/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster395_LbFVorf5_AA.ali.trimmed = 1704-2266
+/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster433_LbFVorf20_AA.ali.trimmed = 2267-2604
+/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster44_dnapol_AA.ali.trimmed = 2605-3350
+/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster453_LbFVorf92_AA.ali.trimmed = 3351-4026
+/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster45_ac81_AA.ali.trimmed = 4027-4215
+/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster462_1_43_p33_AA.ali.trimmed = 4216-4375
+/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster48_p74_AA.ali.trimmed = 4376-4983
+/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster53_38K_AA.ali.trimmed = 4984-5035
+/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster5_ATPase_AA.ali.trimmed = 5036-5345
+/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster708_PDDEXK_AA.ali.trimmed = 5346-5582
+/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster71_helicase_AA.ali.trimmed = 5583-5889
+/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster743_lcat_AA.ali.trimmed = 5890-6147
+/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster89_pif2_AA.ali.trimmed = 6148-6294
+/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster8_lef4_AA.ali.trimmed = 6295-6461
+/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/Cluster997_LbFVorf87_AA.ali.trimmed = 6462-6596
+/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/ClusterNone_LbFVorf23_AA.ali.trimmed = 6597-6667
+/beegfs/data/bguinet/LbFV_family_project/Clustering/Cluster_alignment_core/ClusterNone_p69_AA.ali.trimmed = 6668-6706
+
+End of script.
+
