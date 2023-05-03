@@ -7,4 +7,7 @@ This project is a collaboration between the IMPI team in Tours (France) and the 
 The objective of this project is to caracterize a new family of filamentous viruses.
 
 
+All genomic data generated from this project can be found under the NCBI Bioproject ID : PRJNA964713
+
+
 
